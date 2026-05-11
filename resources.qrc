@@ -6,8 +6,11 @@
         <file>AXON_HMS_logo.png</file>
         <file>AXON_Background.png</file>
         <file>AXON_Monogram.png</file>
+        <file>AXON_HMS_no_monogram.png</file>
     </qresource>
     <qresource prefix="/database">
         <file>users.csv</file>
+        <file>staff.csv</file>
+        <file>bedstats.csv</file>
     </qresource>
 </RCC>

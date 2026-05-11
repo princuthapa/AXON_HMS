@@ -1,0 +1,11 @@
+EmployeeID,Name,Specialty,Department,Shift,Current Patient,Status
+STF-001,Dr. Sarita Adhikari,Cardiologist,Cardiology,Morning,Roshan Thapa,On Duty
+STF-042,Dr. Bijay Rajbhandari,Trauma Specialist,Emergency,Night,Sita Magar,Emergency Call
+STF-102,Markas Gurung (Nurse),Pediatric Care,Pediatrics,Morning,--,Off Duty
+STF-088,Dr. Ishani Shrestha,Surgical Nurse,General Ward,Afternoon,Manish BK,On Duty
+STF-205,Dr. Ramesh Bhattarai,Internal Medicine,ICU,Morning,Anju Poudel,On Duty
+STF-311,Junu Rai (Nurse),Cardio Care,Cardiology,Night,--,On Break
+STF-019,Dr. Aalok Pradhan,Neurologist,Neurology,Morning,Tek Bahadur,On Duty
+STF-077,Laxmi Tamang (Nurse),General Nursing,General Ward,Evening,Jyoti Khatri,On Duty
+STF-133,Dr. Om Prakash Jha,Radiologist,Radiology,Morning,--,Off Duty
+STF-250,Dr. Priyanka Neupane,Anesthesiologist,Surgery,Afternoon,Kiran Lamsal,On Duty

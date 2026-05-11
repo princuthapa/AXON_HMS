@@ -2,6 +2,8 @@
 #include "ui_mainwindow.h"
 #include <QMessageBox>
 #include <QFile>
+#include <QTextStream>
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -14,8 +16,7 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-
-//forgot password qmessagebox setup
+// Forgot password — contact admin message
 void MainWindow::on_forgotPasswordLabel_linkActivated(const QString &/*link*/)
 {
     QMessageBox::information(this,
@@ -23,14 +24,12 @@ void MainWindow::on_forgotPasswordLabel_linkActivated(const QString &/*link*/)
                              "Please contact the System Administrator to reset your password.");
 }
 
-
-
-//logic for authentication from csv
+// Login button — authenticate from CSV, open admin/doctor/receptionist window if valid
 void MainWindow::on_loginButton_clicked()
 {
-    QString enteredUser = ui->usernameInput->text();
-    QString enteredPass = ui->passwordInput->text();
-    QString selectedRole = ui->roleComboBox->currentText();
+    QString enteredUser = ui->usernameInput->text().trimmed();
+    QString enteredPass = ui->passwordInput->text().trimmed();
+    QString selectedRole = ui->roleComboBox->currentText().trimmed();
 
     if (enteredUser.isEmpty() || enteredPass.isEmpty()) {
         QMessageBox::warning(this, "Input Error", "Please fill in all fields.");
@@ -47,7 +46,9 @@ void MainWindow::on_loginButton_clicked()
     bool authenticated = false;
 
     while (!in.atEnd()) {
-        QString line = in.readLine();
+        QString line = in.readLine().trimmed();
+        if (line.isEmpty()) continue;
+
         QStringList fields = line.split(",");
 
         // CSV format: username, password, role
@@ -56,7 +57,9 @@ void MainWindow::on_loginButton_clicked()
             QString csvPass = fields[1].trimmed();
             QString csvRole = fields[2].trimmed();
 
-            if (enteredUser == csvUser && enteredPass == csvPass && selectedRole == csvRole) {
+            if (enteredUser == csvUser &&
+                enteredPass == csvPass &&
+                selectedRole == csvRole) {
                 authenticated = true;
                 break;
             }
@@ -65,9 +68,20 @@ void MainWindow::on_loginButton_clicked()
     file.close();
 
     if (authenticated) {
-        QMessageBox::information(this, "Success", "Welcome, " + enteredUser + "!");
-        // Proceed to the next window based on role
+        if (selectedRole == "Admin") {
+            // Pass 'this' so the admin window can show the login screen on logout
+            adminWindow = new admin(this);
+            adminWindow->setAttribute(Qt::WA_DeleteOnClose);
+            adminWindow->show();
+            this->hide();
+        } else {
+            // Doctor / Receptionist windows — add here when ready
+            QMessageBox::information(this, "Login Successful",
+                                     QString("Welcome, %1!\n(%2 dashboard coming soon.)")
+                                         .arg(enteredUser).arg(selectedRole));
+        }
     } else {
-        QMessageBox::warning(this, "Login Failed", "Invalid username, password, or role.");
+        QMessageBox::warning(this, "Login Failed",
+                             "Invalid username, password, or role.");
     }
 }
