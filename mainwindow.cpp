@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include"adminwindow.h"
 #include "ui_mainwindow.h"
 #include <QMessageBox>
 #include <QFile>
@@ -73,12 +74,18 @@ void MainWindow::on_loginButton_clicked()
 
         if (authenticated) {
             if (selectedRole == "Admin") {
-                // Pass 'this' so the admin window can show the login screen on logout
-                // adminWindow = new admin(this);
-                // adminWindow->setAttribute(Qt::WA_DeleteOnClose);
-                // adminWindow->show();
-                // this->hide();
+                QMessageBox::information(this, "Success", "Login successful! Opening Admin Dashboard...");
+
+                // Create it as a standalone, clean window
+                adminwindow *adminWin = new adminwindow();
+
+                adminWin->setAttribute(Qt::WA_DeleteOnClose);
+                adminWin->show(); // This will work with no type conflicts now!
+
+                this->hide();
             }
+
+
             else if(selectedRole == "Doctor") {
                 // Pass 'this' so the admin window can show the login screen on logout
                 // adminWindow = new admin(this);

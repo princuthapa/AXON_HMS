@@ -71,10 +71,10 @@
    <widget class="QLineEdit" name="userInput">
     <property name="geometry">
      <rect>
-      <x>980</x>
-      <y>320</y>
-      <width>113</width>
-      <height>28</height>
+      <x>940</x>
+      <y>317</y>
+      <width>161</width>
+      <height>31</height>
      </rect>
     </property>
     <property name="text">
@@ -90,10 +90,10 @@
    <widget class="QLineEdit" name="passInput">
     <property name="geometry">
      <rect>
-      <x>980</x>
-      <y>380</y>
-      <width>113</width>
-      <height>28</height>
+      <x>942</x>
+      <y>377</y>
+      <width>161</width>
+      <height>31</height>
      </rect>
     </property>
     <property name="text">
@@ -106,8 +106,8 @@
    <widget class="QPushButton" name="loginButton">
     <property name="geometry">
      <rect>
-      <x>930</x>
-      <y>440</y>
+      <x>980</x>
+      <y>430</y>
       <width>90</width>
       <height>29</height>
      </rect>
