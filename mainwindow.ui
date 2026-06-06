@@ -1,0 +1,567 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1280</width>
+    <height>720</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>1280</width>
+    <height>720</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>1280</width>
+    <height>720</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">/* Sharp white background card container */
+QWidget {
+    background-color: #ffffff;
+    border: 1px solid #dcdad4;
+    border-radius: 16px;
+}
+
+/* Explicitly target only the input boxes and dropdowns for the pill shape */
+QComboBox, QLineEdit {
+    background-color: #fcfbfa;
+    border: 1px solid #dcdad4;
+    border-radius: 18px;
+    color: #1a1a1a;
+    padding: 8px 15px;
+}
+
+QLineEdit:focus, QComboBox:focus {
+    border: 1px solid #1a1a1a;
+}
+
+/* Fix the Title Label: Strip away borders and background, make it bold and dark */
+QLabel#authTitle {
+    background: transparent;
+    border: none;
+    color: #1a1a1a;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+/* Style for the solid black Login Button */
+QPushButton {
+    background-color: #1a1a1a;
+    border: 1px solid #1a1a1a;
+    border-radius: 18px;
+    color: #ffffff;
+    font-weight: bold;
+    padding: 10px;
+}
+
+QPushButton:hover {
+    background-color: #ffffff;
+    color: #1a1a1a;
+}</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <property name="styleSheet">
+    <string notr="true">QWidget#centralwidget {
+    background-color: #f7f5f0;
+}</string>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QWidget" name="widget" native="true">
+        <widget class="QLabel" name="logolabel">
+         <property name="geometry">
+          <rect>
+           <x>-160</x>
+           <y>-10</y>
+           <width>1031</width>
+           <height>721</height>
+          </rect>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QWidget {
+    background-color: #ffffff;
+    border: none;
+}</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="pixmap">
+          <pixmap resource="image.qrc">:/image/axonimage.png</pixmap>
+         </property>
+         <property name="scaledContents">
+          <bool>true</bool>
+         </property>
+        </widget>
+        <widget class="QWidget" name="widget_2" native="true">
+         <property name="geometry">
+          <rect>
+           <x>810</x>
+           <y>90</y>
+           <width>381</width>
+           <height>461</height>
+          </rect>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QWidget {
+	background-color: rgb(255, 245, 230);
+    background-color: #ffffff; /* Sharp white background card */
+    border: 1px solid #dcdad4; /* Elegant warm gray border */
+    border-radius: 16px;       /* Smooth rounded corners */
+}</string>
+         </property>
+         <widget class="QTextEdit" name="textEdit">
+          <property name="geometry">
+           <rect>
+            <x>30</x>
+            <y>75</y>
+            <width>321</width>
+            <height>35</height>
+           </rect>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">border: none;
+color: rgb(0, 0, 0);
+background: transparent;</string>
+          </property>
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+          <property name="html">
+           <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+hr { height: 1px; border-width: 0; }
+li.unchecked::marker { content: &quot;\2610&quot;; }
+li.checked::marker { content: &quot;\2612&quot;; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt; font-style:italic;&quot;&gt;Choose your role:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+         </widget>
+         <widget class="QLineEdit" name="usernamelineEdit">
+          <property name="geometry">
+           <rect>
+            <x>30</x>
+            <y>190</y>
+            <width>321</width>
+            <height>35</height>
+           </rect>
+          </property>
+          <property name="placeholderText">
+           <string>username</string>
+          </property>
+         </widget>
+         <widget class="QLineEdit" name="passwordlineEdit">
+          <property name="geometry">
+           <rect>
+            <x>30</x>
+            <y>240</y>
+            <width>321</width>
+            <height>35</height>
+           </rect>
+          </property>
+          <property name="echoMode">
+           <enum>QLineEdit::EchoMode::Password</enum>
+          </property>
+          <property name="placeholderText">
+           <string> password</string>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="loginButton">
+          <property name="geometry">
+           <rect>
+            <x>150</x>
+            <y>310</y>
+            <width>61</width>
+            <height>41</height>
+           </rect>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>-1</pointsize>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">QPushButton {
+    /* Soft, friendly light blue */
+    background-color: #e3f2fd; 
+    
+    /* Deep navy text color for sharp, readable contrast */
+    color: #0d47a1;            
+    
+    /* Clean 2px border matching the text */
+    border: 2px solid #0d47a1; 
+    
+    /* Smooth capsule shape */
+    border-radius: 15px;       
+    
+    font-size: 13px;
+    font-weight: bold;
+}
+
+/* When the cursor floats over the button */
+QPushButton:hover {
+    /* Fills into a richer, slightly darker sky blue */
+    background-color: #bbdefb; 
+}
+
+/* When the user physically clicks the button down */
+QPushButton:pressed {
+    /* Deepens temporarily on click for tactile feedback */
+    background-color: #90caf9; 
+}</string>
+          </property>
+          <property name="text">
+           <string>Login</string>
+          </property>
+         </widget>
+         <widget class="QLabel" name="forgotPasswordLabel">
+          <property name="geometry">
+           <rect>
+            <x>120</x>
+            <y>360</y>
+            <width>116</width>
+            <height>20</height>
+           </rect>
+          </property>
+          <property name="layoutDirection">
+           <enum>Qt::LayoutDirection::LeftToRight</enum>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">border:none;
+color: rgb(0, 85, 255);</string>
+          </property>
+          <property name="text">
+           <string>Forgot Password?</string>
+          </property>
+         </widget>
+         <widget class="QLabel" name="authtitle">
+          <property name="geometry">
+           <rect>
+            <x>100</x>
+            <y>20</y>
+            <width>184</width>
+            <height>30</height>
+           </rect>
+          </property>
+          <property name="palette">
+           <palette>
+            <active>
+             <colorrole role="WindowText">
+              <brush brushstyle="SolidPattern">
+               <color alpha="255">
+                <red>26</red>
+                <green>26</green>
+                <blue>26</blue>
+               </color>
+              </brush>
+             </colorrole>
+             <colorrole role="Button">
+              <brush brushstyle="SolidPattern">
+               <color alpha="0">
+                <red>0</red>
+                <green>0</green>
+                <blue>0</blue>
+               </color>
+              </brush>
+             </colorrole>
+             <colorrole role="Text">
+              <brush brushstyle="SolidPattern">
+               <color alpha="255">
+                <red>26</red>
+                <green>26</green>
+                <blue>26</blue>
+               </color>
+              </brush>
+             </colorrole>
+             <colorrole role="ButtonText">
+              <brush brushstyle="SolidPattern">
+               <color alpha="255">
+                <red>26</red>
+                <green>26</green>
+                <blue>26</blue>
+               </color>
+              </brush>
+             </colorrole>
+             <colorrole role="Base">
+              <brush brushstyle="SolidPattern">
+               <color alpha="0">
+                <red>0</red>
+                <green>0</green>
+                <blue>0</blue>
+               </color>
+              </brush>
+             </colorrole>
+             <colorrole role="Window">
+              <brush brushstyle="SolidPattern">
+               <color alpha="0">
+                <red>0</red>
+                <green>0</green>
+                <blue>0</blue>
+               </color>
+              </brush>
+             </colorrole>
+             <colorrole role="PlaceholderText">
+              <brush brushstyle="SolidPattern">
+               <color alpha="128">
+                <red>26</red>
+                <green>26</green>
+                <blue>26</blue>
+               </color>
+              </brush>
+             </colorrole>
+            </active>
+            <inactive>
+             <colorrole role="WindowText">
+              <brush brushstyle="SolidPattern">
+               <color alpha="255">
+                <red>26</red>
+                <green>26</green>
+                <blue>26</blue>
+               </color>
+              </brush>
+             </colorrole>
+             <colorrole role="Button">
+              <brush brushstyle="SolidPattern">
+               <color alpha="0">
+                <red>0</red>
+                <green>0</green>
+                <blue>0</blue>
+               </color>
+              </brush>
+             </colorrole>
+             <colorrole role="Text">
+              <brush brushstyle="SolidPattern">
+               <color alpha="255">
+                <red>26</red>
+                <green>26</green>
+                <blue>26</blue>
+               </color>
+              </brush>
+             </colorrole>
+             <colorrole role="ButtonText">
+              <brush brushstyle="SolidPattern">
+               <color alpha="255">
+                <red>26</red>
+                <green>26</green>
+                <blue>26</blue>
+               </color>
+              </brush>
+             </colorrole>
+             <colorrole role="Base">
+              <brush brushstyle="SolidPattern">
+               <color alpha="0">
+                <red>0</red>
+                <green>0</green>
+                <blue>0</blue>
+               </color>
+              </brush>
+             </colorrole>
+             <colorrole role="Window">
+              <brush brushstyle="SolidPattern">
+               <color alpha="0">
+                <red>0</red>
+                <green>0</green>
+                <blue>0</blue>
+               </color>
+              </brush>
+             </colorrole>
+             <colorrole role="PlaceholderText">
+              <brush brushstyle="SolidPattern">
+               <color alpha="128">
+                <red>26</red>
+                <green>26</green>
+                <blue>26</blue>
+               </color>
+              </brush>
+             </colorrole>
+            </inactive>
+            <disabled>
+             <colorrole role="WindowText">
+              <brush brushstyle="SolidPattern">
+               <color alpha="255">
+                <red>26</red>
+                <green>26</green>
+                <blue>26</blue>
+               </color>
+              </brush>
+             </colorrole>
+             <colorrole role="Button">
+              <brush brushstyle="SolidPattern">
+               <color alpha="0">
+                <red>0</red>
+                <green>0</green>
+                <blue>0</blue>
+               </color>
+              </brush>
+             </colorrole>
+             <colorrole role="Text">
+              <brush brushstyle="SolidPattern">
+               <color alpha="255">
+                <red>26</red>
+                <green>26</green>
+                <blue>26</blue>
+               </color>
+              </brush>
+             </colorrole>
+             <colorrole role="ButtonText">
+              <brush brushstyle="SolidPattern">
+               <color alpha="255">
+                <red>26</red>
+                <green>26</green>
+                <blue>26</blue>
+               </color>
+              </brush>
+             </colorrole>
+             <colorrole role="Base">
+              <brush brushstyle="SolidPattern">
+               <color alpha="0">
+                <red>0</red>
+                <green>0</green>
+                <blue>0</blue>
+               </color>
+              </brush>
+             </colorrole>
+             <colorrole role="Window">
+              <brush brushstyle="SolidPattern">
+               <color alpha="0">
+                <red>0</red>
+                <green>0</green>
+                <blue>0</blue>
+               </color>
+              </brush>
+             </colorrole>
+             <colorrole role="PlaceholderText">
+              <brush brushstyle="SolidPattern">
+               <color alpha="128">
+                <red>26</red>
+                <green>26</green>
+                <blue>26</blue>
+               </color>
+              </brush>
+             </colorrole>
+            </disabled>
+           </palette>
+          </property>
+          <property name="font">
+           <font>
+            <family>Simple Bold Jut Out</family>
+            <pointsize>16</pointsize>
+            <bold>true</bold>
+            <underline>true</underline>
+           </font>
+          </property>
+          <property name="layoutDirection">
+           <enum>Qt::LayoutDirection::LeftToRight</enum>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">color: #1a1a1a;
+background: transparent;
+border: none;</string>
+          </property>
+          <property name="text">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;AUTHENTICATION&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
+         </widget>
+         <widget class="QComboBox" name="comboBox">
+          <property name="geometry">
+           <rect>
+            <x>110</x>
+            <y>110</y>
+            <width>150</width>
+            <height>35</height>
+           </rect>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>150</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">/* This targets the popup view container */
+QComboBox QAbstractItemView {
+    background-color: #ffffff;
+    color: #000000; /* Forces the text to be black */
+    selection-background-color: #0078d7; /* Highlight color when hovering */
+    selection-color: #ffffff; /* Text color when hovered */
+}</string>
+          </property>
+          <item>
+           <property name="text">
+            <string>Admin</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Doctor</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Receptionist</string>
+           </property>
+          </item>
+         </widget>
+         <widget class="QLabel" name="label">
+          <property name="geometry">
+           <rect>
+            <x>90</x>
+            <y>430</y>
+            <width>331</width>
+            <height>31</height>
+           </rect>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">QLabel {
+	font: italic 10pt &quot;Segoe UI&quot;;
+    color: #8c8c8c;        /* A soft, professional gray color */
+    font-size: 10px;       /* Keeps the text small and sleek */
+    font-weight: normal;   /* Ensures it doesn't look bold */
+    margin-top: 10px;      /* Pushes it slightly away from the forgot password link */
+	border: none;
+	background: none;
+}</string>
+          </property>
+          <property name="text">
+           <string>© 2026 AXON. All rights reserved!</string>
+          </property>
+         </widget>
+        </widget>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1280</width>
+     <height>27</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <resources>
+  <include location="image.qrc"/>
+ </resources>
+ <connections/>
+</ui>
