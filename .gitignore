@@ -1,9 +1,35 @@
-"# Qt build output" 
-"build/" 
-"*.pro.user" 
-"*.autosave" 
-"# OneDrive junk" 
-"desktop.ini" 
-"*.tmp" 
-"Thumbs.db" 
+# Qt Build Output
 build/
+debug/
+release/
+*.pro.user
+*.pro.user.*
+*.autosave
+*.qbs.user
+*.qbs.user.*
+moc_*.cpp
+moc_*.h
+qrc_*.cpp
+ui_*.h
+Makefile*
+*.o
+*.obj
+*.exe
+*.dll
+*.lib
+*.exp
+*.pdb
+.qmake.stash
+.qmake.cache
+# OneDrive junk
+desktop.ini
+Thumbs.db
+*.tmp
+~$*
+.~lock.*
+# Windows junk
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
