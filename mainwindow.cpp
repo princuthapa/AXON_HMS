@@ -88,6 +88,7 @@ void MainWindow::handleLogin()
 
     if (!username.isEmpty() && !password.isEmpty()) {
         qDebug() << "Success! Opening Dashboard for role:" << role;
+
     } else {
         qDebug() << "Error: Fields cannot be blank!";
     }

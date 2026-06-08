@@ -254,7 +254,7 @@ QPushButton:pressed {
            <enum>Qt::LayoutDirection::LeftToRight</enum>
           </property>
           <property name="styleSheet">
-           <string notr="true">border:none;
+           <string notr="true">border: none;
 color: rgb(0, 85, 255);</string>
           </property>
           <property name="text">
