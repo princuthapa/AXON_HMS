@@ -132,7 +132,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
 &lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Choose your role:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
          </widget>
-         <widget class="QLineEdit" name="usernamelineEdit">
+         <widget class="QLineEdit" name="userInput">
           <property name="geometry">
            <rect>
             <x>30</x>
@@ -145,7 +145,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
            <string>username</string>
           </property>
          </widget>
-         <widget class="QLineEdit" name="passwordlineEdit">
+         <widget class="QLineEdit" name="passInput">
           <property name="geometry">
            <rect>
             <x>30</x>
@@ -438,7 +438,7 @@ border: none;</string>
            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:12pt; text-decoration:none;&quot;&gt;AUTHENTICATION&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
          </widget>
-         <widget class="QComboBox" name="comboBox">
+         <widget class="QComboBox" name="roleComboBox">
           <property name="geometry">
            <rect>
             <x>110</x>
@@ -556,7 +556,7 @@ QComboBox QAbstractItemView {
      <x>0</x>
      <y>0</y>
      <width>1280</width>
-     <height>27</height>
+     <height>35</height>
     </rect>
    </property>
   </widget>

@@ -8,6 +8,7 @@
 #include <QTextStream>
 #include <QCoreApplication>
 
+
 // Include your other dashboard window headers here
 #include "adminwindow.h"
 // #include "doctorwindow.h" // Uncomment or add your other roles' headers as you create them
@@ -19,16 +20,16 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 
     // Enter key navigation updates
-    connect(ui->usernamelineEdit, &QLineEdit::returnPressed, this, [this]() {
-        ui->passwordlineEdit->setFocus();
+    connect(ui->userInput, &QLineEdit::returnPressed, this, [this]() {
+        ui->passInput->setFocus();
     });
-    connect(ui->passwordlineEdit, &QLineEdit::returnPressed, this, &MainWindow::handleLogin);
+    connect(ui->passInput, &QLineEdit::returnPressed, this, &MainWindow::handleLogin);
     connect(ui->loginButton, &QPushButton::clicked, this, &MainWindow::handleLogin);
 
     // Password visibility action setup
     eyeAction = new QAction(this);
     eyeAction->setIcon(QIcon(":/images/ihide.png"));
-    ui->passwordlineEdit->addAction(eyeAction, QLineEdit::TrailingPosition);
+    ui->passInput->addAction(eyeAction, QLineEdit::TrailingPosition);
     connect(eyeAction, &QAction::triggered, this, &MainWindow::togglePasswordVisibility);
 }
 
@@ -39,102 +40,90 @@ MainWindow::~MainWindow()
 
 void MainWindow::togglePasswordVisibility()
 {
-    if (ui->passwordlineEdit->echoMode() == QLineEdit::Password) {
-        ui->passwordlineEdit->setEchoMode(QLineEdit::Normal);
+    if (ui->passInput->echoMode() == QLineEdit::Password) {
+        ui->passInput->setEchoMode(QLineEdit::Normal);
         eyeAction->setIcon(QIcon(":/images/ishow.png"));
     } else {
-        ui->passwordlineEdit->setEchoMode(QLineEdit::Password);
+        ui->passInput->setEchoMode(QLineEdit::Password);
         eyeAction->setIcon(QIcon(":/images/ihide.png"));
     }
 }
 
-void MainWindow::handleLogin()
+void MainWindow::handleLogin() {
+    qDebug() << "Handling login via handleLogin()... Redirecting to button logic.";
+
+    // Call the button click slot directly
+    on_loginButton_clicked();
+}
+
+void MainWindow::on_loginButton_clicked()
 {
-    QString username = ui->usernamelineEdit->text().trimmed();
-    QString password = ui->passwordlineEdit->text();
-    QString selectedRole = ui->comboBox->currentText();
+    QString enteredUser = ui->userInput->text().trimmed();
+    QString enteredPass = ui->passInput->text().trimmed();
+    QString selectedRole = ui->roleComboBox->currentText().trimmed();
 
-    // Print attempt parameters to debug terminal console
-    qDebug() << "--- Login Attempt ---";
-    qDebug() << "Input Username:" << username;
-    qDebug() << "Input Role:" << selectedRole;
-
-    if (username.isEmpty() || password.isEmpty()) {
-        QMessageBox msgBox(QMessageBox::Warning, "Error", "Username and password cannot be empty!", QMessageBox::Ok, this);
-        msgBox.setStyleSheet("QLabel { color: black; }");
-        msgBox.exec();
+    if (enteredUser.isEmpty() || enteredPass.isEmpty()) {
+        QMessageBox::warning(this, "Input Error", "Please fill in all fields.");
         return;
     }
 
-    // DYNAMIC PATH: Looks for the CSV right next to where your app's .exe is executing
-    QString filePath = QCoreApplication::applicationDirPath() + "/users.csv";
-    QFile file(filePath);
+    QFile file(":/database/users.csv");
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        qDebug() << "CRITICAL ERROR: Cannot access CSV file at path:" << filePath;
-
-        QString errorPrompt = "Cannot open users.csv file!\n\nPlease copy 'users.csv' and paste it into:\n" + filePath;
-        QMessageBox msgBox(QMessageBox::Critical, "Error", errorPrompt, QMessageBox::Ok, this);
-        msgBox.setStyleSheet("QLabel { color: black; }");
-        msgBox.exec();
+        QMessageBox::critical(this, "Error", "Database file not found.");
         return;
     }
 
-    bool credentialsValid = false;
     QTextStream in(&file);
+    bool authenticated = false;
 
     while (!in.atEnd()) {
-        QString line = in.readLine();
-        if (line.trimmed().isEmpty()) continue;
+        QString line = in.readLine().trimmed();
+        if (line.isEmpty()) continue;
 
-        QStringList parts = line.split(",");
+        QStringList fields = line.split(",");
 
-        if (parts.size() >= 3) {
-            QString fileUsername = parts[0].trimmed();
-            QString filePassword = parts[1].trimmed();
-            QString fileRole = parts[2].trimmed();
+        // CSV format: username, password, role
+        if (fields.size() >= 3) {
+            QString csvUser = fields[0].trimmed();
+            QString csvPass = fields[1].trimmed();
+            QString csvRole = fields[2].trimmed();
 
-            if (username == fileUsername && password == filePassword && selectedRole == fileRole) {
-                credentialsValid = true;
+            if (enteredUser == csvUser &&
+                enteredPass == csvPass &&
+                selectedRole == csvRole) {
+                authenticated = true;
                 break;
             }
         }
     }
     file.close();
 
-    if (credentialsValid) {
-        qDebug() << "Authentication Status: SUCCESS! Redirecting to dashboard routing layer.";
-
-        // 1. Hide the current Login window cleanly
-        this->hide();
-
-        // 2. Route based on selected dashboard context role
+    if (authenticated) {
         if (selectedRole == "Admin") {
-            // Allocate Admin window to the heap memory architecture
-            adminwindow *adminDash = new adminwindow();
-
-            // Set up clean memory freeing attributes when closed
-            adminDash->setAttribute(Qt::WA_DeleteOnClose);
-            adminDash->show();
-
-        } else if (selectedRole == "Doctor") {
-            // Placeholder: When you have DoctorWindow set up, implement it similarly:
-            // DoctorWindow *doctorDash = new DoctorWindow();
-            // doctorDash->setAttribute(Qt::WA_DeleteOnClose);
-            // doctorDash->show();
-
-            QMessageBox::information(this, "Doctor Dashboard", "Login Successful!\nDoctor interface window mapping placeholder context.");
-        } else {
-            // General Fallback dashboard router routing context
-            QMessageBox::information(this, "Success", "Login successful for role: " + selectedRole);
+            adminwindow *adminWin = new adminwindow();
+            adminWin->setAttribute(Qt::WA_DeleteOnClose);
+            adminWin->show();
+            this->hide();
         }
-
+        else if(selectedRole == "Doctor") {
+            // Pass 'this' so the admin window can show the login screen on logout
+            // adminWindow = new admin(this);
+            // adminWindow->setAttribute(Qt::WA_DeleteOnClose);
+            // adminWindow->show();
+            // this->hide();
+        }
+        else {
+            // Pass 'this' so the admin window can show the login screen on logout
+            // adminWindow = new admin(this);
+            // adminWindow->setAttribute(Qt::WA_DeleteOnClose);
+            // adminWindow->show();
+            // this->hide();
+        }
     } else {
-        qDebug() << "Authentication Status: FAILED. Credentials mismatch in data loops.";
-
-        QMessageBox msgBox(QMessageBox::Warning, "Login Failed", "Invalid username, password, or role!", QMessageBox::Ok, this);
-        msgBox.setStyleSheet("QLabel { color: black; }");
-        msgBox.exec();
-
-        ui->passwordlineEdit->clear();
+        QMessageBox::warning(this, "Login Failed",
+                             "Invalid username, password, or role.");
     }
+
 }
+
+

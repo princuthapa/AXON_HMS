@@ -22,6 +22,8 @@ private slots:
     void handleLogin();
     void togglePasswordVisibility();
 
+    void on_loginButton_clicked();
+
 private:
     Ui::MainWindow *ui;
     QAction *eyeAction;
