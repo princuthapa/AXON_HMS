@@ -87,37 +87,6 @@ QPushButton:hover {
           <height>720</height>
          </size>
         </property>
-        <widget class="QLabel" name="logolabel">
-         <property name="geometry">
-          <rect>
-           <x>-160</x>
-           <y>9</y>
-           <width>1091</width>
-           <height>701</height>
-          </rect>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>1280</width>
-           <height>720</height>
-          </size>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">QWidget {
-    background-color: #ffffff;
-    border: none;
-}</string>
-         </property>
-         <property name="text">
-          <string/>
-         </property>
-         <property name="pixmap">
-          <pixmap resource="image.qrc">:/image/axonimage.png</pixmap>
-         </property>
-         <property name="scaledContents">
-          <bool>true</bool>
-         </property>
-        </widget>
         <widget class="QWidget" name="widget_2" native="true">
          <property name="geometry">
           <rect>
@@ -239,26 +208,6 @@ QPushButton:pressed {
           </property>
           <property name="text">
            <string>Login</string>
-          </property>
-         </widget>
-         <widget class="QLabel" name="forgotPasswordLabel">
-          <property name="geometry">
-           <rect>
-            <x>130</x>
-            <y>360</y>
-            <width>121</width>
-            <height>20</height>
-           </rect>
-          </property>
-          <property name="layoutDirection">
-           <enum>Qt::LayoutDirection::LeftToRight</enum>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">border: none;
-color: rgb(0, 85, 255);</string>
-          </property>
-          <property name="text">
-           <string>Forgot Password?</string>
           </property>
          </widget>
          <widget class="QLabel" name="authtitle">
@@ -573,6 +522,28 @@ QComboBox QAbstractItemView {
           </property>
          </widget>
         </widget>
+        <widget class="QLabel" name="label_2">
+         <property name="geometry">
+          <rect>
+           <x>-160</x>
+           <y>40</y>
+           <width>961</width>
+           <height>631</height>
+          </rect>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">border: none;</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="pixmap">
+          <pixmap resource="resources.qrc">:/images/axonimage.png</pixmap>
+         </property>
+         <property name="scaledContents">
+          <bool>true</bool>
+         </property>
+        </widget>
        </widget>
       </item>
      </layout>
@@ -592,7 +563,7 @@ QComboBox QAbstractItemView {
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
  <resources>
-  <include location="image.qrc"/>
+  <include location="resources.qrc"/>
  </resources>
  <connections/>
 </ui>

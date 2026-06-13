@@ -18,14 +18,9 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow() override;
 
-protected:
-    // This tells the compiler that we are overriding Qt's event filter function
-    bool eventFilter(QObject *obj, QEvent *event) override;
-
 private slots:
     void handleLogin();
     void togglePasswordVisibility();
-    void handleForgotPassword();
 
 private:
     Ui::MainWindow *ui;
