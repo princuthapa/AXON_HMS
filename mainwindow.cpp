@@ -1,9 +1,9 @@
 #include "mainwindow.h"
+#include "adminwindow.h"
 #include "ui_mainwindow.h"
-#include <QIcon>
-#include <QDebug>
-#include <QMessageBox> // Required for the popup box
-#include <QMouseEvent>
+#include <QMessageBox>
+#include <QFile>
+#include <QKeyEvent>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -11,26 +11,23 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    connect(ui->usernamelineEdit, &QLineEdit::returnPressed, this, [this]() {
-        ui->passwordlineEdit->setFocus();
-    });
+    this->setStyleSheet("QLineEdit {"
+                        "    background-color: #ffffff;"
+                        "    color: #000000;"
+                        "    placeholder-text-color: #36454F;"
+                        "}");
 
-    connect(ui->passwordlineEdit, &QLineEdit::returnPressed, this, &MainWindow::handleLogin);
-    connect(ui->loginButton, &QPushButton::clicked, this, &MainWindow::handleLogin);
+    // Install event filter on both input fields
+    ui->userInput->installEventFilter(this);
+    ui->passInput->installEventFilter(this);
 
-    eyeAction = new QAction(this);
-    eyeAction->setIcon(QIcon(":/eye/ihide.png"));
-    ui->passwordlineEdit->addAction(eyeAction, QLineEdit::TrailingPosition);
+    // Set tab order explicitly
+    QWidget::setTabOrder(ui->userInput, ui->passInput);
+    QWidget::setTabOrder(ui->passInput, ui->roleComboBox);
+    QWidget::setTabOrder(ui->roleComboBox, ui->loginButton);
 
-    connect(eyeAction, &QAction::triggered, this, &MainWindow::togglePasswordVisibility);
-
-    // Make the forgot password label clickable like a link
-    ui->forgotPasswordLabel->setCursor(Qt::PointingHandCursor);
-    ui->forgotPasswordLabel->setStyleSheet("QLabel { color: #0056b3; text-decoration: underline; } "
-                                           "QLabel:hover { color: #003366; }");
-
-    // Connect the label's click event to our new popup slot
-    ui->forgotPasswordLabel->installEventFilter(this);
+    // Set the first field as focused when window opens
+    ui->userInput->setFocus();
 }
 
 MainWindow::~MainWindow()
@@ -38,58 +35,110 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-// Intercepts the click event on the label widget cleanly
 bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 {
-    if (obj == ui->forgotPasswordLabel && event->type() == QEvent::MouseButtonPress) {
-        QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
-        if (mouseEvent->button() == Qt::LeftButton) {
-            handleForgotPassword();
-            return true;
+    if (event->type() == QEvent::KeyPress) {
+        QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+
+        if (keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter) {
+
+            // Enter on username field → jump to password field
+            if (obj == ui->userInput) {
+                ui->passInput->setFocus();
+                return true;
+            }
+
+            // Enter on password field → trigger login
+            if (obj == ui->passInput) {
+                attemptLogin();
+                return true;
+            }
         }
     }
+
+    // Pass everything else to the default handler
     return QMainWindow::eventFilter(obj, event);
 }
 
-void MainWindow::togglePasswordVisibility()
+// Extracted login logic into its own method so both
+// the button click and Enter key can call it
+void MainWindow::attemptLogin()
 {
-    if (ui->passwordlineEdit->echoMode() == QLineEdit::Password) {
-        ui->passwordlineEdit->setEchoMode(QLineEdit::Normal);
-        eyeAction->setIcon(QIcon(":/eye/ishow.png"));
+    QString enteredUser = ui->userInput->text().trimmed();
+    QString enteredPass = ui->passInput->text().trimmed();
+    QString selectedRole = ui->roleComboBox->currentText().trimmed();
+
+    if (enteredUser.isEmpty() || enteredPass.isEmpty()) {
+        QMessageBox::warning(this, "Input Error", "Please fill in all fields.");
+        ui->userInput->setFocus(); // bring focus back to start
+        return;
+    }
+
+    QFile file(":/database/users.csv");
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QMessageBox::critical(this, "Error", "Database file not found.");
+        return;
+    }
+
+    QTextStream in(&file);
+    bool authenticated = false;
+
+    while (!in.atEnd()) {
+        QString line = in.readLine().trimmed();
+        if (line.isEmpty()) continue;
+
+        QStringList fields = line.split(",");
+
+        if (fields.size() >= 3) {
+            QString csvUser = fields[0].trimmed();
+            QString csvPass = fields[1].trimmed();
+            QString csvRole = fields[2].trimmed();
+
+            if (enteredUser == csvUser &&
+                enteredPass == csvPass &&
+                selectedRole == csvRole) {
+                authenticated = true;
+                break;
+            }
+        }
+    }
+    file.close();
+
+    if (authenticated) {
+        if (selectedRole == "Admin") {
+            QMessageBox::information(this, "Success",
+                                     "Login successful! Opening Admin Dashboard...");
+            adminwindow *adminWin = new adminwindow();
+            adminWin->setAttribute(Qt::WA_DeleteOnClose);
+            adminWin->show();
+            this->hide();
+        }
+        else if (selectedRole == "Doctor") {
+            // doctorWindow *docWin = new doctorWindow();
+            // docWin->setAttribute(Qt::WA_DeleteOnClose);
+            // docWin->show();
+            // this->hide();
+        }
+        else {
+            // other roles here
+        }
     } else {
-        ui->passwordlineEdit->setEchoMode(QLineEdit::Password);
-        eyeAction->setIcon(QIcon(":/eye/ihide.png"));
+        QMessageBox::warning(this, "Login Failed",
+                             "Invalid username, password, or role.");
+        ui->passInput->clear();
+        ui->passInput->setFocus(); // let user retype password quickly
     }
 }
 
-void MainWindow::handleForgotPassword()
+void MainWindow::on_forgotPass_linkActivated(const QString &/*link*/)
 {
-    // Create the message box instance
-    QMessageBox msgBox(this);
-
-    // Set up the window title and your exact text message
-    msgBox.setWindowTitle("Reset Password");
-    msgBox.setText("Contact to administration");
-    msgBox.setIcon(QMessageBox::Information);
-    msgBox.setStandardButtons(QMessageBox::Ok);
-
-    // Force the text to display in black color so it bypasses global styling conflicts
-    msgBox.setStyleSheet("QLabel { color: #000000; font-size: 14px; } "
-                         "QPushButton { background-color: #000000; color: #ffffff; border-radius: 10px; padding: 5px 15px; }");
-
-    // Execute and show the popup box
-    msgBox.exec();
+    QMessageBox::information(this,
+                             "Account Recovery",
+                             "Please contact the System Administrator "
+                             "to reset your password.");
 }
-void MainWindow::handleLogin()
+
+void MainWindow::on_loginButton_clicked()
 {
-    QString username = ui->usernamelineEdit->text();
-    QString password = ui->passwordlineEdit->text();
-    QString role = ui->comboBox->currentText();
-
-    if (!username.isEmpty() && !password.isEmpty()) {
-        qDebug() << "Success! Opening Dashboard for role:" << role;
-
-    } else {
-        qDebug() << "Error: Fields cannot be blank!";
-    }
+    attemptLogin();
 }

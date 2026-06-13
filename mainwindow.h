@@ -2,7 +2,6 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QAction>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -19,17 +18,15 @@ public:
     ~MainWindow() override;
 
 protected:
-    // This tells the compiler that we are overriding Qt's event filter function
     bool eventFilter(QObject *obj, QEvent *event) override;
 
 private slots:
-    void handleLogin();
-    void togglePasswordVisibility();
-    void handleForgotPassword();
+    void on_forgotPass_linkActivated(const QString &link);
+    void on_loginButton_clicked();
 
 private:
     Ui::MainWindow *ui;
-    QAction *eyeAction;
+    void attemptLogin();
 };
 
 #endif // MAINWINDOW_H

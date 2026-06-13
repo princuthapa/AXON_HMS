@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/images">
+        <file>AXON_HMS_logo.png</file>
+        <file>AUTH_BG.jpg</file>
+    </qresource>
+    <qresource prefix="/database">
+        <file>users.csv</file>
+    </qresource>
+</RCC>
