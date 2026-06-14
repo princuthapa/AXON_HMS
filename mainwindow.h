@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QAction>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -17,16 +18,15 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow() override;
 
-protected:
-    bool eventFilter(QObject *obj, QEvent *event) override;
-
 private slots:
-    void on_forgotPass_linkActivated(const QString &link);
+    void handleLogin();
+    void togglePasswordVisibility();
+
     void on_loginButton_clicked();
 
 private:
     Ui::MainWindow *ui;
-    void attemptLogin();
+    QAction *eyeAction;
 };
 
 #endif // MAINWINDOW_H

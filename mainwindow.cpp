@@ -1,9 +1,17 @@
 #include "mainwindow.h"
-#include "adminwindow.h"
 #include "ui_mainwindow.h"
+#include "adminwindow.h"
+#include <QIcon>
+#include <QDebug>
 #include <QMessageBox>
 #include <QFile>
-#include <QKeyEvent>
+#include <QTextStream>
+#include <QCoreApplication>
+
+
+// Include your other dashboard window headers here
+#include "adminwindow.h"
+// #include "doctorwindow.h" // Uncomment or add your other roles' headers as you create them
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -11,23 +19,18 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    this->setStyleSheet("QLineEdit {"
-                        "    background-color: #ffffff;"
-                        "    color: #000000;"
-                        "    placeholder-text-color: #36454F;"
-                        "}");
+    // Enter key navigation updates
+    connect(ui->userInput, &QLineEdit::returnPressed, this, [this]() {
+        ui->passInput->setFocus();
+    });
+    connect(ui->passInput, &QLineEdit::returnPressed, this, &MainWindow::handleLogin);
+    connect(ui->loginButton, &QPushButton::clicked, this, &MainWindow::handleLogin);
 
-    // Install event filter on both input fields
-    ui->userInput->installEventFilter(this);
-    ui->passInput->installEventFilter(this);
-
-    // Set tab order explicitly
-    QWidget::setTabOrder(ui->userInput, ui->passInput);
-    QWidget::setTabOrder(ui->passInput, ui->roleComboBox);
-    QWidget::setTabOrder(ui->roleComboBox, ui->loginButton);
-
-    // Set the first field as focused when window opens
-    ui->userInput->setFocus();
+    // Password visibility action setup
+    eyeAction = new QAction(this);
+    eyeAction->setIcon(QIcon(":/images/ihide.png"));
+    ui->passInput->addAction(eyeAction, QLineEdit::TrailingPosition);
+    connect(eyeAction, &QAction::triggered, this, &MainWindow::togglePasswordVisibility);
 }
 
 MainWindow::~MainWindow()
@@ -35,34 +38,25 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-bool MainWindow::eventFilter(QObject *obj, QEvent *event)
+void MainWindow::togglePasswordVisibility()
 {
-    if (event->type() == QEvent::KeyPress) {
-        QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
-
-        if (keyEvent->key() == Qt::Key_Return || keyEvent->key() == Qt::Key_Enter) {
-
-            // Enter on username field → jump to password field
-            if (obj == ui->userInput) {
-                ui->passInput->setFocus();
-                return true;
-            }
-
-            // Enter on password field → trigger login
-            if (obj == ui->passInput) {
-                attemptLogin();
-                return true;
-            }
-        }
+    if (ui->passInput->echoMode() == QLineEdit::Password) {
+        ui->passInput->setEchoMode(QLineEdit::Normal);
+        eyeAction->setIcon(QIcon(":/images/ishow.png"));
+    } else {
+        ui->passInput->setEchoMode(QLineEdit::Password);
+        eyeAction->setIcon(QIcon(":/images/ihide.png"));
     }
-
-    // Pass everything else to the default handler
-    return QMainWindow::eventFilter(obj, event);
 }
 
-// Extracted login logic into its own method so both
-// the button click and Enter key can call it
-void MainWindow::attemptLogin()
+void MainWindow::handleLogin() {
+    qDebug() << "Handling login via handleLogin()... Redirecting to button logic.";
+
+    // Call the button click slot directly
+    on_loginButton_clicked();
+}
+
+void MainWindow::on_loginButton_clicked()
 {
     QString enteredUser = ui->userInput->text().trimmed();
     QString enteredPass = ui->passInput->text().trimmed();
@@ -70,7 +64,6 @@ void MainWindow::attemptLogin()
 
     if (enteredUser.isEmpty() || enteredPass.isEmpty()) {
         QMessageBox::warning(this, "Input Error", "Please fill in all fields.");
-        ui->userInput->setFocus(); // bring focus back to start
         return;
     }
 
@@ -89,6 +82,7 @@ void MainWindow::attemptLogin()
 
         QStringList fields = line.split(",");
 
+        // CSV format: username, password, role
         if (fields.size() >= 3) {
             QString csvUser = fields[0].trimmed();
             QString csvPass = fields[1].trimmed();
@@ -106,39 +100,30 @@ void MainWindow::attemptLogin()
 
     if (authenticated) {
         if (selectedRole == "Admin") {
-            QMessageBox::information(this, "Success",
-                                     "Login successful! Opening Admin Dashboard...");
             adminwindow *adminWin = new adminwindow();
             adminWin->setAttribute(Qt::WA_DeleteOnClose);
             adminWin->show();
             this->hide();
         }
-        else if (selectedRole == "Doctor") {
-            // doctorWindow *docWin = new doctorWindow();
-            // docWin->setAttribute(Qt::WA_DeleteOnClose);
-            // docWin->show();
+        else if(selectedRole == "Doctor") {
+            // Pass 'this' so the admin window can show the login screen on logout
+            // adminWindow = new admin(this);
+            // adminWindow->setAttribute(Qt::WA_DeleteOnClose);
+            // adminWindow->show();
             // this->hide();
         }
         else {
-            // other roles here
+            // Pass 'this' so the admin window can show the login screen on logout
+            // adminWindow = new admin(this);
+            // adminWindow->setAttribute(Qt::WA_DeleteOnClose);
+            // adminWindow->show();
+            // this->hide();
         }
     } else {
         QMessageBox::warning(this, "Login Failed",
                              "Invalid username, password, or role.");
-        ui->passInput->clear();
-        ui->passInput->setFocus(); // let user retype password quickly
     }
+
 }
 
-void MainWindow::on_forgotPass_linkActivated(const QString &/*link*/)
-{
-    QMessageBox::information(this,
-                             "Account Recovery",
-                             "Please contact the System Administrator "
-                             "to reset your password.");
-}
 
-void MainWindow::on_loginButton_clicked()
-{
-    attemptLogin();
-}

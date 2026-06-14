@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/eye">
+        <file>ihide.png</file>
+        <file>ishow.png</file>
+    </qresource>
+</RCC>
