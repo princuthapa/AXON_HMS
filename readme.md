@@ -17,7 +17,7 @@ AXON HMS is a hospital management system built as a 2nd semester academic projec
 | Pranjal Upadhyay | Database Designer & Testing/QA |
 | Princu Thapa | Documentation & Research |
 
-> **Supervisor:** Bipesh Raj Subedi
+> Supervisor: Bipesh Raj Subedi
 
 ---
 
