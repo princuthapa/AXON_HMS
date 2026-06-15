@@ -31,6 +31,40 @@ MainWindow::MainWindow(QWidget *parent)
     eyeAction->setIcon(QIcon(":/images/ihide.png"));
     ui->passInput->addAction(eyeAction, QLineEdit::TrailingPosition);
     connect(eyeAction, &QAction::triggered, this, &MainWindow::togglePasswordVisibility);
+
+    //rolecombobox dropdown arrow
+    ui->roleComboBox->setStyleSheet(
+        "QComboBox {"
+        "    background-color: white;"
+        "    color: black;"
+        "    padding-left: 5px;"
+        "    padding-right: 25px;"
+        "}"
+        "QComboBox::drop-down {"
+        "    subcontrol-position: top right;"
+        "    width: 25px;"
+        "    border: none;"
+        "}"
+        /* Default state: Pointing Right (Scaled Down) */
+        "QComboBox::down-arrow {"
+        "    image: url(:/images/right-arrow-icon.png);"
+        "    width: 12px;"  /* Adjust this value to make it smaller or larger */
+        "    height: 12px;" /* Keep width and height equal to maintain aspect ratio */
+        "}"
+        /* Clicked/Open state: Pointing Down (Scaled Down) */
+        "QComboBox::down-arrow:on {"
+        "    image: url(:/images/down-arrow-icon.png);"
+        "    width: 12px;"  /* Make sure this matches the width above */
+        "    height: 12px;" /* Make sure this matches the height above */
+        "}"
+
+        "QAbstractItemView {"
+        "    background-color: white;"
+        "    color: black;"
+        "    selection-background-color: #e0e0e0;"
+        "    selection-color: black;"
+        "}"
+        );
 }
 
 MainWindow::~MainWindow()

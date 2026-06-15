@@ -5,6 +5,8 @@
         <file>ihide.png</file>
         <file>ishow.png</file>
         <file>AXON_Monogram.png</file>
+        <file>down-arrow-icon.png</file>
+        <file>right-arrow-icon.png</file>
     </qresource>
     <qresource prefix="/database">
         <file>users.csv</file>
