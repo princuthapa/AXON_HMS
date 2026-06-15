@@ -23,7 +23,11 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>AXON- HOSPITAL MANAGEMENT SYSTEM</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="resources.qrc">
+    <normaloff>:/images/AXON_Monogram.png</normaloff>:/images/AXON_Monogram.png</iconset>
   </property>
   <property name="styleSheet">
    <string notr="true">/* Sharp white background card container */
@@ -86,6 +90,9 @@ QPushButton:hover {
           <width>1280</width>
           <height>720</height>
          </size>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">background-color: rgb(255, 255, 255);</string>
         </property>
         <widget class="QWidget" name="widget_2" native="true">
          <property name="geometry">
@@ -550,17 +557,6 @@ QComboBox QAbstractItemView {
     </item>
    </layout>
   </widget>
-  <widget class="QMenuBar" name="menubar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>1280</width>
-     <height>35</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QStatusBar" name="statusbar"/>
  </widget>
  <resources>
   <include location="resources.qrc"/>
