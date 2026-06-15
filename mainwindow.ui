@@ -525,7 +525,10 @@ QComboBox QAbstractItemView {
 }</string>
           </property>
           <property name="text">
-           <string>© 2026 AXON. All rights reserved!</string>
+           <string>&lt;a href=&quot;https://github.com/AXON-HOSPITAL-MANAGEMENT-SYSTEM/AXON_HMS&quot; style=&quot;color:#008080; text-decoration:none; font-weight:500;&quot;&gt;© 2026 AXON. All rights reserved!&lt;/a&gt;</string>
+          </property>
+          <property name="openExternalLinks">
+           <bool>true</bool>
           </property>
          </widget>
         </widget>
