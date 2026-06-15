@@ -1,6 +1,5 @@
 <RCC>
     <qresource prefix="/images">
-        <file>AUTH_BG.jpg</file>
         <file>axonimage.png</file>
         <file>ihide.png</file>
         <file>ishow.png</file>
@@ -9,6 +8,6 @@
         <file>right-arrow-icon.png</file>
     </qresource>
     <qresource prefix="/database">
-        <file>users.csv</file>
+        <file>staff_database.csv</file>
     </qresource>
 </RCC>
