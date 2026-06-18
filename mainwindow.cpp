@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "doctorwindow.h"
 #include "adminwindow.h"
 #include <QIcon>
 #include <QDebug>
@@ -139,25 +140,26 @@ void MainWindow::on_loginButton_clicked()
             adminWin->show();
             this->hide();
         }
-        else if(selectedRole == "Doctor") {
-            // Pass 'this' so the admin window can show the login screen on logout
-            // adminWindow = new admin(this);
-            // adminWindow->setAttribute(Qt::WA_DeleteOnClose);
-            // adminWindow->show();
-            // this->hide();
+        else if (selectedRole.compare("Doctor", Qt::CaseInsensitive) == 0) {
+            qDebug() << "Launching Doctor Window...";
+            // No parent: this needs to be its own top-level window, not an
+            // (invisible) child embedded inside the login form.
+            doctorwindow *doctorWin = new doctorwindow();
+            doctorWin->setAttribute(Qt::WA_DeleteOnClose);
+            doctorWin->show();
+            this->hide();
         }
-        else {
-            // Pass 'this' so the admin window can show the login screen on logout
-            // adminWindow = new admin(this);
-            // adminWindow->setAttribute(Qt::WA_DeleteOnClose);
-            // adminWindow->show();
-            // this->hide();
-        }
+        // else if (selectedRole.compare("Receptionist", Qt::CaseInsensitive) == 0) {
+        //     qDebug() << "Launching Receptionist Window...";
+        //     receptionistwindow *receptionistWin = new receptionistwindow();
+        //     receptionistWin->setAttribute(Qt::WA_DeleteOnClose);
+        //     receptionistWin->show();
+        //     this->hide();
+        // }
     } else {
         QMessageBox::warning(this, "Login Failed",
                              "Invalid username, password, or role.");
     }
-
 }
 
 

@@ -9,18 +9,28 @@ CONFIG += c++17
 SOURCES += \
     admin.cpp \
     adminwindow.cpp \
+    doctor.cpp \
+    doctorwindow.cpp \
     main.cpp \
     mainwindow.cpp \
+    patientmanager.cpp \
+    person.cpp \
     staffmanager.cpp
 
 HEADERS += \
     admin.h \
     adminwindow.h \
+    doctor.h \
+    doctorwindow.h \
     mainwindow.h \
+    patient.h \
+    patientmanager.h \
+    person.h \
     staffmanager.h
 
 FORMS += \
     adminwindow.ui \
+    doctorwindow.ui \
     mainwindow.ui
 
 # Default rules for deployment.
