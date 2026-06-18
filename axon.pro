@@ -21,6 +21,7 @@ HEADERS += \
 
 FORMS += \
     adminwindow.ui \
+    doctorwindow.ui \
     mainwindow.ui
 
 # Default rules for deployment.
