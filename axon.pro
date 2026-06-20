@@ -9,29 +9,36 @@ CONFIG += c++17
 SOURCES += \
     admin.cpp \
     adminwindow.cpp \
+    billingmanager.cpp \
     doctor.cpp \
     doctorwindow.cpp \
     main.cpp \
     mainwindow.cpp \
     patientmanager.cpp \
     person.cpp \
+    receptionist.cpp \
+    receptionistwindow.cpp \
     staffmanager.cpp
 
 HEADERS += \
     admin.h \
     adminwindow.h \
+    billingmanager.h \
     doctor.h \
     doctorwindow.h \
     mainwindow.h \
     patient.h \
     patientmanager.h \
     person.h \
+    receptionist.h \
+    receptionistwindow.h \
     staffmanager.h
 
 FORMS += \
+    mainwindow.ui \
     adminwindow.ui \
     doctorwindow.ui \
-    mainwindow.ui
+    receptionistwindow.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include "doctorwindow.h"
 #include "adminwindow.h"
+#include "receptionistwindow.h"
 #include <QIcon>
 #include <QDebug>
 #include <QMessageBox>
@@ -117,7 +118,7 @@ void MainWindow::on_loginButton_clicked()
 
         QStringList fields = line.split(",");
 
-        // CSV format: username, password, role
+        // CSV format: username, password, role, full_name
         if (fields.size() >= 3) {
             QString csvUser = fields[0].trimmed();
             QString csvPass = fields[1].trimmed();
@@ -126,40 +127,43 @@ void MainWindow::on_loginButton_clicked()
             if (enteredUser == csvUser &&
                 enteredPass == csvPass &&
                 selectedRole == csvRole) {
+
                 authenticated = true;
-                break;
+
+                // 1. Extract full name right here while 'fields' holds the correct row data
+                QString fullName = (fields.size() >= 5) ? fields[4].trimmed() : csvUser;
+
+                // 2. Open the respective window immediately
+                if (selectedRole == "Admin") {
+                    adminwindow *adminWin = new adminwindow(fullName);
+                    adminWin->setAttribute(Qt::WA_DeleteOnClose);
+                    adminWin->show();
+                    this->hide();
+                }
+                else if (selectedRole.compare("Doctor", Qt::CaseInsensitive) == 0) {
+                    qDebug() << "Launching Doctor Window for: " << fullName;
+                    doctorwindow *doctorWin = new doctorwindow(fullName);
+                    doctorWin->setAttribute(Qt::WA_DeleteOnClose);
+                    doctorWin->show();
+                    this->hide();
+                }
+                else if (selectedRole.compare("Receptionist", Qt::CaseInsensitive) == 0) {
+                    qDebug() << "Launching Receptionist Window...";
+                    receptionistwindow *receptionistWin = new receptionistwindow();
+                    receptionistWin->setAttribute(Qt::WA_DeleteOnClose);
+                    receptionistWin->show();
+                    this->hide();
+                }
+
+                break; // Break out of the while loop since we found the user
             }
         }
     }
-    file.close();
+    file.close(); // File closes safely here after loop ends or breaks
 
-    if (authenticated) {
-        if (selectedRole == "Admin") {
-            adminwindow *adminWin = new adminwindow();
-            adminWin->setAttribute(Qt::WA_DeleteOnClose);
-            adminWin->show();
-            this->hide();
-        }
-        else if (selectedRole.compare("Doctor", Qt::CaseInsensitive) == 0) {
-            qDebug() << "Launching Doctor Window...";
-            // No parent: this needs to be its own top-level window, not an
-            // (invisible) child embedded inside the login form.
-            doctorwindow *doctorWin = new doctorwindow();
-            doctorWin->setAttribute(Qt::WA_DeleteOnClose);
-            doctorWin->show();
-            this->hide();
-        }
-        // else if (selectedRole.compare("Receptionist", Qt::CaseInsensitive) == 0) {
-        //     qDebug() << "Launching Receptionist Window...";
-        //     receptionistwindow *receptionistWin = new receptionistwindow();
-        //     receptionistWin->setAttribute(Qt::WA_DeleteOnClose);
-        //     receptionistWin->show();
-        //     this->hide();
-        // }
-    } else {
+    // 3. If the loop finished and authenticated is still false, show the failure message
+    if (!authenticated) {
         QMessageBox::warning(this, "Login Failed",
                              "Invalid username, password, or role.");
     }
 }
-
-

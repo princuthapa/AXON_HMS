@@ -8,9 +8,10 @@
 #include <QMenu>
 #include <QAction>
 
-adminwindow::adminwindow(QWidget *parent) :
+adminwindow::adminwindow(const QString &employeeName, QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::AXON_ADMIN)
+    ui(new Ui::Form),// Connects perfectly to your form!
+    currentAdminName(employeeName)
 {
     ui->setupUi(this);
 

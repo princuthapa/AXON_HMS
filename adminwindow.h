@@ -18,7 +18,7 @@ class adminwindow : public QWidget
     Q_OBJECT
 
 public:
-    explicit adminwindow(QWidget *parent = nullptr);
+    explicit adminwindow(const QString &employeeName, QWidget *parent = nullptr);
     ~adminwindow();
 
 signals:
@@ -36,6 +36,7 @@ private:
     Admin *adminBackend;
     StaffManager *staffMgr;
     QTimer *timer;               // For real-time updates
+    QString currentAdminName;
 };
 
 #endif // ADMINWINDOW_H
