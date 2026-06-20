@@ -13,12 +13,13 @@ class doctorwindow : public QWidget
     Q_OBJECT
 
 public:
-    explicit doctorwindow(QWidget *parent = nullptr);
+    explicit doctorwindow(const QString &employeeName, QWidget *parent = nullptr);
     ~doctorwindow();
 
 private:
     Ui::DoctorForm *ui;
     Doctor *doctorBackend;
+    QString currentUserName;
 };
 
 #endif // DOCTORWINDOW_H

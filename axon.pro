@@ -29,9 +29,9 @@ HEADERS += \
     staffmanager.h
 
 FORMS += \
+    mainwindow.ui \
     adminwindow.ui \
-    doctorwindow.ui \
-    mainwindow.ui
+    doctorwindow.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
