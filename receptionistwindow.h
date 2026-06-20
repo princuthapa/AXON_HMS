@@ -2,9 +2,10 @@
 #define RECEPTIONISTWINDOW_H
 
 #include <QWidget>
+#include "receptionist.h"
 
 namespace Ui {
-class receptionistwindow;
+class ReceptionistForm;
 }
 
 class receptionistwindow : public QWidget
@@ -16,7 +17,8 @@ public:
     ~receptionistwindow();
 
 private:
-    Ui::receptionistwindow *ui;
+    Ui::ReceptionistForm *ui;
+    Receptionist *receptionistBackend;
 };
 
 #endif // RECEPTIONISTWINDOW_H
