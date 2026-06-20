@@ -1,3 +1,4 @@
-admin,admin,Admin
-doctor,doctor,Doctor
-receptionist1,receptionist1,Receptionist
+# username, password, Role, staff_id, full name,age,gender, phone number
+admin,admin,Admin, STF_001, naam thar, 19,Male, 9700000000
+doctor,doctor,Doctor, STF_002, hari thapa, 46,Male, 9801029202
+receptionist1,receptionist1,Receptionist,STF_003, sita shr, 27, Female, 9822222222

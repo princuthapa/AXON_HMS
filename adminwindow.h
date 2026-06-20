@@ -14,13 +14,14 @@ class adminwindow : public QWidget // <-- Changed from QMainWindow to QWidget
     Q_OBJECT
 
 public:
-    explicit adminwindow(QWidget *parent = nullptr);
+    explicit adminwindow(const QString &employeeName, QWidget *parent = nullptr);
     ~adminwindow();
 
 private:
     Ui::Form *ui; // <-- Links specifically to the UI Form pointer template
     Admin *adminBackend;
     StaffManager *staffMgr;
+    QString currentAdminName;
 };
 
 #endif // ADMINWINDOW_H

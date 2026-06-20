@@ -1,9 +1,10 @@
 #include "adminwindow.h"
 #include "ui_adminwindow.h"
 
-adminwindow::adminwindow(QWidget *parent) :
+adminwindow::adminwindow(const QString &employeeName, QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::Form) // Connects perfectly to your form!
+    ui(new Ui::Form),// Connects perfectly to your form!
+    currentAdminName(employeeName)
 {
     ui->setupUi(this);
 
