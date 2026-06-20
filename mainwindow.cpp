@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 #include "doctorwindow.h"
 #include "adminwindow.h"
+#include "receptionistwindow.h"
 #include <QIcon>
 #include <QDebug>
 #include <QMessageBox>
@@ -144,6 +145,13 @@ void MainWindow::on_loginButton_clicked()
                     doctorwindow *doctorWin = new doctorwindow(fullName);
                     doctorWin->setAttribute(Qt::WA_DeleteOnClose);
                     doctorWin->show();
+                    this->hide();
+                }
+                else if (selectedRole.compare("Receptionist", Qt::CaseInsensitive) == 0) {
+                    qDebug() << "Launching Receptionist Window...";
+                    receptionistwindow *receptionistWin = new receptionistwindow();
+                    receptionistWin->setAttribute(Qt::WA_DeleteOnClose);
+                    receptionistWin->show();
                     this->hide();
                 }
 
