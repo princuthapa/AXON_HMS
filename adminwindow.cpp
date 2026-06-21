@@ -164,10 +164,10 @@ adminwindow::adminwindow(const QString &employeeName, QWidget *parent) :
     setupPatientHeader();
 
     // UI Placeholders / Pure frontend mock data states
-    addPatientRow("#PT-0021", "Brandon Vance", "Male", "Cardiac Checkup", "Dr. Ross", "Checked In");
-    addPatientRow("#PT-0022", "Clara Thompson", "Female", "Migraine Treatment", "Dr. House", "No Show");
-    addPatientRow("#PT-0023", "David Miller", "Male", "Fracture Follow-up", "Dr. Strange", "No Show");
-    addPatientRow("#PT-0024", "Emma Watson", "Female", "General Physical", "Dr. Ross", "Checked In");
+    addPatientRow("#PT-0021", "Aditya Poudel", "Male", "Cardiac Checkup", "Dr. Rijal", "Checked In");
+    addPatientRow("#PT-0022", "Mira Gurung", "Female", "Migraine Treatment", "Dr. Subedi", "No Show");
+    addPatientRow("#PT-0023", "Hari Rana", "Male", "Fracture Follow-up", "Dr. Baral", "No Show");
+    addPatientRow("#PT-0024", "Sita Wagle", "Female", "General Physical", "Dr. Acharya", "Completed");
 }
 
 adminwindow::~adminwindow()
