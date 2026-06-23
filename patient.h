@@ -8,8 +8,12 @@
 struct Patient {
     QString id;
     QString name;
+    QString age;
     QString gender;
-    QString diagnosisTreatment; // the diagram's combined "diagnosis/treatment" field
+    QString diagnosisTreatment; // combined "diagnosis/treatment" field from the diagram
+    QString assignedDoctor;
+    QString status;             // Admitted / Discharged
+    QString bedNumber;
 };
 
 #endif // PATIENT_H
