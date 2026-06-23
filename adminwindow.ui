@@ -328,6 +328,9 @@ QPushButton#btnMenu:hover {
       </item>
       <item>
        <widget class="QStackedWidget" name="stackedWidget">
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
         <widget class="QWidget" name="page">
          <property name="styleSheet">
           <string notr="true">/* Style all four card containers */
