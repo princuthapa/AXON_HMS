@@ -149,7 +149,7 @@ void MainWindow::on_loginButton_clicked()
                 }
                 else if (selectedRole.compare("Receptionist", Qt::CaseInsensitive) == 0) {
                     qDebug() << "Launching Receptionist Window...";
-                    receptionistwindow *receptionistWin = new receptionistwindow();
+                    ReceptionistWindow *receptionistWin = new ReceptionistWindow();
                     receptionistWin->setAttribute(Qt::WA_DeleteOnClose);
                     receptionistWin->show();
                     this->hide();

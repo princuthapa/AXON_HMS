@@ -2,23 +2,37 @@
 #define RECEPTIONISTWINDOW_H
 
 #include <QWidget>
-#include "receptionist.h"
 
-namespace Ui {
-class ReceptionistForm;
-}
+QT_BEGIN_NAMESPACE
+namespace Ui { class ReceptionistWindow; }
+QT_END_NAMESPACE
 
-class receptionistwindow : public QWidget
+class ReceptionistWindow : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit receptionistwindow(QWidget *parent = nullptr);
-    ~receptionistwindow();
+    ReceptionistWindow(QWidget *parent = nullptr);
+    ~ReceptionistWindow();
+
+private slots:
+    // Sidebar Navigation Buttons
+    void onDashboardClicked();
+    void onRegisterPatientClicked();
+    void onScheduleClicked();
+    void onBillingClicked();
+
+    // Action Buttons
+    void onViewAllAppointmentsClicked();
 
 private:
-    Ui::ReceptionistForm *ui;
-    Receptionist *receptionistBackend;
+    Ui::ReceptionistWindow *ui;
+
+    // Helper functions to keep code clean
+    void setupConnections();
+    void refreshDashboardData();
+    void populateAppointmentsTable();
+    void populateRecentPatientsTable();
 };
 
 #endif // RECEPTIONISTWINDOW_H
