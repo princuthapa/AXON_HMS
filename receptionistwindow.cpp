@@ -52,25 +52,25 @@ void ReceptionistWindow::refreshDashboardData()
 void ReceptionistWindow::onDashboardClicked()
 {
     qDebug() << "Switching to Dashboard View (Page Index 0)";
-    ui->stackedWidget->setCurrentIndex(0);
+    ui->widgetstackedtogether->setCurrentIndex(0);
 }
 
 void ReceptionistWindow::onRegisterPatientClicked()
 {
     qDebug() << "Switching to Patient Registration Form (Page Index 1)";
-    ui->stackedWidget->setCurrentIndex(1);
+    ui->widgetstackedtogether->setCurrentIndex(1);
 }
 
 void ReceptionistWindow::onScheduleClicked()
 {
     qDebug() << "Switching to Master Schedule (Page Index 2)";
-    ui->stackedWidget->setCurrentIndex(2);
+    ui->widgetstackedtogether->setCurrentIndex(2);
 }
 
 void ReceptionistWindow::onBillingClicked()
 {
     qDebug() << "Switching to Billing Module (Page Index 3)";
-    ui->stackedWidget->setCurrentIndex(3);
+    ui->widgetstackedtogether->setCurrentIndex(3);
 }
 
 void ReceptionistWindow::onViewAllAppointmentsClicked()
@@ -95,26 +95,26 @@ void ReceptionistWindow::populateRecentPatientsTable()
 }
 void ReceptionistWindow::onClearFormClicked()
 {
-    ui->inputName->clear();
-    ui->inputAge->setValue(0);
-    ui->inputPhone->clear();
-    ui->inputAddress->clear();
+    ui->namebox->clear();
+    ui->agebar->clear();
+    ui->phonebox->clear();
+    ui->addressbox->clear();
 
     // Resets dropdowns to their first option (index 0)
-    ui->comboGender->setCurrentIndex(0);
-    ui->comboDoctor->setCurrentIndex(0);
-    ui->comboDepartment->setCurrentIndex(0);
+    ui->genderbox->setCurrentIndex(0);
+    ui->doctorbox->setCurrentIndex(0);
+    ui->departmentbox->setCurrentIndex(0);
 }
 void ReceptionistWindow::onSubmitRegistrationClicked()
 {
     // 1. GRAB ALL DATA FROM THE FORM
-    QString name = ui->inputName->text();
-    QString age = QString::number(ui->inputAge->value());
-    QString gender = ui->comboGender->currentText();
-    QString phone = ui->inputPhone->text();
-    QString address = ui->inputAddress->text();
-    QString doctor = ui->comboDoctor->currentText();
-    QString dept = ui->comboDepartment->currentText();
+    QString name = ui->namebox->text();
+    QString age = QString::number(ui->agebar->value());
+    QString gender = ui->genderbox->currentText();
+    QString phone = ui->phonebox->text();
+    QString address = ui->addressbox->text();
+    QString doctor = ui->doctorbox->currentText();
+    QString dept = ui->departmentbox->currentText();
 
     if (name.isEmpty()) return; // Don't register empty names
 
