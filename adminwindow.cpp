@@ -450,17 +450,31 @@ void adminwindow::initDashboardGraphs()
                                      "<span style='color:#bbf7d0;'>●</span> Inactive");
 
     // 2. ACTIVE DOCTORS donut
+    int activeDoctors = 0;
+    int inactiveDoctors = 0;
+    for (const auto &s : staffMgr->getAllStaff()) {
+        if (s.role.toLower().trimmed() == "doctor") {
+            if (s.status.toLower().trimmed() == "on leave") {
+                inactiveDoctors++;
+            } else {
+                activeDoctors++;
+            }
+        }
+    }
+
     QPieSeries *docSeries = new QPieSeries();
     docSeries->setHoleSize(0.75);
     docSeries->setPieSize(0.95);
-    docSeries->append("On Shift", 42)->setBrush(QColor(0x0284c7));
-    docSeries->append("Vacant",    8)->setBrush(QColor(0xf1f5f9));
+    docSeries->append("Active",   activeDoctors)->setBrush(QColor(0x0284c7));
+    docSeries->append("On Leave", inactiveDoctors)->setBrush(QColor(0xe0f2fe));
     QChart *docChart = new QChart();
     docChart->addSeries(docSeries);
     if (ui->widgetGraphDoctors) embedChart(ui->widgetGraphDoctors, docChart);
+    if (ui->lblValueDoctors)
+        ui->lblValueDoctors->setText(QString("%1 / %2").arg(activeDoctors).arg(activeDoctors + inactiveDoctors));
     if (ui->lblSubtextDoctors)
-        ui->lblSubtextDoctors->setText("<span style='color:#0284c7;'>●</span> On Shift &nbsp;"
-                                       "<span style='color:#f1f5f9;'>●</span> Vacant");
+        ui->lblSubtextDoctors->setText("<span style='color:#0284c7;'>●</span> Active &nbsp;"
+                                       "<span style='color:#e0f2fe;'>●</span> On Leave");
 
     // 3. PATIENTS gender breakdown (from actual data)
     int male = 0, female = 0, other = 0;
@@ -695,7 +709,7 @@ void adminwindow::setupStaffPage()
     };
     makeCol("STAFF ID",  1); makeCol("FULL NAME", 2); makeCol("ROLE", 1);
     makeCol("AGE",       1); makeCol("GENDER",    1); makeCol("PHONE",    2);
-    makeCol("USERNAME",  1); makeCol("STATUS",    1); makeCol("ACTIONS",   1);
+    makeCol("USERNAME",  2); makeCol("STATUS",    2); makeCol("ACTIONS",   2);
     pageLayout->addWidget(colHeader);
 
 
@@ -848,9 +862,9 @@ void adminwindow::addStaffRow(const StaffData &s)
     rl->addWidget(lblAge,    1);
     rl->addWidget(lblGender, 1);
     rl->addWidget(lblPhone,  2);
-    rl->addWidget(lblUser,   1);
-    rl->addWidget(lblStatus, 1);
-    rl->addWidget(actionWidget, 1);
+    rl->addWidget(lblUser,   2);
+    rl->addWidget(lblStatus, 2);
+    rl->addWidget(actionWidget, 2);
     row->setLayout(rl);
 
     // Insert before the trailing stretch
