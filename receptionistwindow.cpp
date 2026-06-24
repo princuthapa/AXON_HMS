@@ -14,6 +14,7 @@ ReceptionistWindow::ReceptionistWindow(QWidget *parent)
     , ui(new Ui::ReceptionistWindow)
 {
     ui->setupUi(this);
+        this->setWindowTitle("AXON-HMS: Receptionist Dashboard");
 
     // 1. Connect UI elements to our functions
     setupConnections();
