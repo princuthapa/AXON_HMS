@@ -8,6 +8,7 @@
         <file>right-arrow-icon.png</file>
         <file>adminimg.png</file>
         <file>axonimg.png</file>
+        <file>doctor.jpg</file>
     </qresource>
     <qresource prefix="/database">
         <file>staff_database.csv</file>
