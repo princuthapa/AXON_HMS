@@ -6,9 +6,12 @@
         <file>AXON_Monogram.png</file>
         <file>down-arrow-icon.png</file>
         <file>right-arrow-icon.png</file>
+        <file>adminimg.png</file>
+        <file>axonimg.png</file>
     </qresource>
     <qresource prefix="/database">
         <file>staff_database.csv</file>
         <file>patients_database.csv</file>
+        <file>patient_database.csv</file>
     </qresource>
 </RCC>

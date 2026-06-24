@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Form</class>
- <widget class="QWidget" name="Form">
+ <class>AXON_ADMIN</class>
+ <widget class="QWidget" name="AXON_ADMIN">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -10,10 +10,724 @@
     <height>720</height>
    </rect>
   </property>
+  <property name="maximumSize">
+   <size>
+    <width>1280</width>
+    <height>720</height>
+   </size>
+  </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true">/* 1. Sidebar Background - Light Beige */
+QFrame#sidebarFrame {
+    background-color: #FDFBF7; /* Soft, warm beige-white */
+    border-right: 1px solid #e2e8f0;
+}
+
+/* 2. Navigation Buttons Styling */
+QPushButton#btnOverview, QPushButton#btnManagerStaff, QPushButton#btnScheduling {
+    background-color: transparent;
+    border-radius: 8px;
+    padding: 10px 15px;
+    color: #475569;
+    font-family: &quot;Segoe UI&quot;, sans-serif;
+    font-weight: 600;
+    text-align: left;
+    margin: 5px 10px;
+}
+
+/* Hover effect */
+QPushButton#btnOverview:hover, QPushButton#btnManagerStaff:hover, QPushButton#btnScheduling:hover {
+    background-color: #f1ede6; /* Slightly darker beige on hover */
+    color: #1e293b;
+}
+
+/* Active state for selected tab */
+QPushButton#btnOverview:checked, QPushButton#btnManagerStaff:checked, QPushButton#btnScheduling:checked {
+    background-color: #e5e0d7; 
+    color: #3f352a;
+    border-left: 4px solid #3f352a;
+}</string>
+  </property>
+  <layout class="QHBoxLayout" name="horizontalLayout">
+   <item>
+    <widget class="QFrame" name="sidebarFrame">
+     <property name="maximumSize">
+      <size>
+       <width>250</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">/* 1. Sidebar Frame Styling */
+QFrame#sidebarFrame {
+    background-color: #FDFBF7; 
+    border-right: 1px solid #e2e8f0;
+}
+
+/* 2. Target your specific buttons by object name regardless of hierarchy */
+#btnOverview, #btnStaffManager, #btnScheduling {
+    background-color: transparent;
+    border: none;
+    text-align: left;
+    padding-left: 15px;
+    font-weight: normal;
+}
+
+/* 3. Hover State */
+#btnOverview:hover, #btnStaffManager:hover, #btnScheduling:hover {
+    background-color: #f1f5f9; 
+    border-radius: 10px;
+}
+
+/* 4. Active / Checked State */
+#btnOverview:checked, #btnStaffManager:checked, #btnScheduling:checked {
+    background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:0, stop:0 #ccffff, stop:1 #ffffff);
+    border-radius: 10px;
+    font-weight: bold;
+}</string>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::Shape::StyledPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Shadow::Raised</enum>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item alignment="Qt::AlignmentFlag::AlignHCenter">
+       <widget class="QLabel" name="lblLogo">
+        <property name="maximumSize">
+         <size>
+          <width>100</width>
+          <height>100</height>
+         </size>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="pixmap">
+         <pixmap resource="resources.qrc">:/images/axonimg.png</pixmap>
+        </property>
+        <property name="scaledContents">
+         <bool>true</bool>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignmentFlag::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="verticalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Orientation::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>40</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btnOverview">
+        <property name="styleSheet">
+         <string notr="true"/>
+        </property>
+        <property name="text">
+         <string>Overview</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="autoExclusive">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btnStaffManager">
+        <property name="styleSheet">
+         <string notr="true"/>
+        </property>
+        <property name="text">
+         <string>Staff Manager</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="autoExclusive">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btnScheduling">
+        <property name="text">
+         <string>Scheduling</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="autoExclusive">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="verticalSpacer">
+        <property name="orientation">
+         <enum>Qt::Orientation::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>349</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QWidget" name="workspaceContainer" native="true">
+     <property name="styleSheet">
+      <string notr="true">background-color: #ffffff;</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QLabel" name="message">
+          <property name="styleSheet">
+           <string notr="true">/* Specifically target your welcome message label */
+QLabel#message {
+    color: #334155;                 /* Dark slate color ensures it is visible */
+    font-family: &quot;Segoe UI&quot;, sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    background-color: transparent;  /* Ensure it has no background color blocking it */
+    padding: 0px 10px;              /* Breathing room */
+}</string>
+          </property>
+          <property name="text">
+           <string>Welcome, Admin!</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Orientation::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QLabel" name="lblDateTime">
+          <property name="styleSheet">
+           <string notr="true">/* Style the Live Clock Label directly as a clean container box */
+QLabel#lblDateTime {
+    background-color: #f1f5f9; /* Clean slate-gray box fill */
+    border: 1px solid #e2e8f0;  /* Delicate border line */
+    border-radius: 14px;        /* Smooth rounded pill edges */
+    padding: 6px 16px;          /* Perfect breathing room around the text */
+    
+    /* Typography Style */
+    color: #475569;             /* Crisp slate text color */
+    font-family: &quot;Segoe UI&quot;, -apple-system, sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+}</string>
+          </property>
+          <property name="text">
+           <string>Loading Time...</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label">
+          <property name="maximumSize">
+           <size>
+            <width>36</width>
+            <height>36</height>
+           </size>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="pixmap">
+           <pixmap resource="resources.qrc">:/images/adminimg.png</pixmap>
+          </property>
+          <property name="scaledContents">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="lblAdminTag">
+          <property name="styleSheet">
+           <string notr="true">
+background-color: qradialgradient(spread:pad, cx:0.5, cy:0.5, radius:0.5, fx:0.5, fy:0.5, stop:0 rgba(170, 255, 255, 255), stop:1 rgba(255, 255, 255, 255));
+border-radius: 16px;
+font: 600 9pt &quot;Segoe UI&quot;;
+color: #000000; </string>
+          </property>
+          <property name="text">
+           <string>ADMIN</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btnMenu">
+          <property name="maximumSize">
+           <size>
+            <width>40</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="sizeIncrement">
+           <size>
+            <width>40</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">/* Optimized 3-Bars Menu Button */
+QPushButton#btnMenu {
+    background-color: transparent;
+    color: #475569;             /* Slate text color */
+    border: none;
+    font-family: &quot;Segoe UI&quot;, sans-serif;
+    font-size: 20px;            /* Bumps up the size of the bars */
+    font-weight: bold;          /* Makes the bars look clean and solid */
+    padding: 0px 6px;
+    margin-bottom: 2px;         /* Keeps it perfectly vertically aligned with the text */
+}
+
+QPushButton#btnMenu:hover {
+    color: #0f172a;
+    background-color: #e2e8f0;  /* Soft grey hover box */
+    border-radius: 6px;
+}</string>
+          </property>
+          <property name="text">
+           <string>☰</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QStackedWidget" name="stackedWidget">
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <widget class="QWidget" name="page">
+         <property name="styleSheet">
+          <string notr="true">/* Style all four card containers */
+QFrame {
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+}
+
+/* FORCE every single label inside the cards to be dark and visible by default */
+QFrame QLabel {
+    color: #475569 !important;
+    font-family: &quot;Segoe UI&quot;, Arial;
+}
+
+/* Make the big number labels extra large and dark */
+QLabel#lblValueStaff, 
+QLabel#lblValuePatients, 
+QLabel#lblValueReceptionists {
+    color: #0f172a !important;
+    font-size: 28px !important;
+    font-weight: bold !important;
+}
+
+/* Make the revenue number pop in Teal/Green */
+QLabel#lblValueRevenue {
+    color: #0d9488 !important;
+    font-size: 28px !important;
+    font-weight: bold !important;
+}</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_3">
+            <item>
+             <widget class="QFrame" name="frame_4">
+              <property name="styleSheet">
+               <string notr="true">QFrame#frame_4 {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #f0fdf4, stop:0.6 #fbfdfb, stop:1 #ffffff);
+    border: 2px solid #bbf7d0;
+    border-radius: 16px;
+    padding: 12px;
+}
+QFrame#frame_4:hover {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #dcfce7, stop:1 #ffffff);
+    border: 2px solid #4ade80;
+}
+QFrame#frame_4 QLabel {
+    border: none !important;
+    background: transparent !important;
+}
+/* Header: Deep bold forest green */
+QFrame#frame_4 QLabel:first-child {
+    color: #15803d !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    font-family: &quot;Segoe UI&quot;, sans-serif;
+}
+/* Main Value */
+QLabel#lblValueStaff {
+    color: #14532d !important;
+    font-size: 34px !important;
+    font-weight: 800 !important;
+}
+/* Subtext: Medium forest green */
+QFrame#frame_4 QLabel:last-child {
+    color: #166534 !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+}</string>
+              </property>
+              <property name="frameShape">
+               <enum>QFrame::Shape::StyledPanel</enum>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Shadow::Raised</enum>
+              </property>
+              <layout class="QVBoxLayout" name="verticalLayout_7">
+               <item>
+                <widget class="QLabel" name="lblTitleStaff">
+                 <property name="styleSheet">
+                  <string notr="true">color: rgb(0, 0, 0);
+font: 600 11pt &quot;Segoe UI Semibold&quot;;</string>
+                 </property>
+                 <property name="text">
+                  <string>Total Active Staff</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignmentFlag::AlignCenter</set>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="lblValueStaff">
+                 <property name="text">
+                  <string>312 / 350</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QWidget" name="widgetGraphStaff" native="true">
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>120</height>
+                  </size>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="lblSubtextStaff">
+                 <property name="text">
+                  <string>Total Appointed: 3,350</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QFrame" name="frame_3">
+              <property name="styleSheet">
+               <string notr="true">QFrame#frame_3 {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #f0f9ff, stop:0.6 #fbfdfd, stop:1 #ffffff);
+    border: 2px solid #bae6fd;
+    border-radius: 16px;
+    padding: 12px;
+}
+QFrame#frame_3:hover {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #e0f2fe, stop:1 #ffffff);
+    border: 2px solid #38bdf8;
+}
+QFrame#frame_3 QLabel {
+    border: none !important;
+    background: transparent !important;
+}
+/* Header: Deep bold ocean blue */
+QFrame#frame_3 QLabel:first-child {
+    color: #0369a1 !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    font-family: &quot;Segoe UI&quot;, sans-serif;
+}
+/* Main Value */
+QLabel#lblValueDoctors {
+    color: #0c4a6e !important;
+    font-size: 34px !important;
+    font-weight: 800 !important;
+}
+/* Subtext: Medium dark slate blue */
+QFrame#frame_3 QLabel:last-child {
+    color: #075985 !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+}</string>
+              </property>
+              <property name="frameShape">
+               <enum>QFrame::Shape::StyledPanel</enum>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Shadow::Raised</enum>
+              </property>
+              <layout class="QVBoxLayout" name="verticalLayout_6">
+               <item>
+                <widget class="QLabel" name="lblTitleDoctors">
+                 <property name="styleSheet">
+                  <string notr="true">color: rgb(0, 0, 0);
+font: 600 11pt &quot;Segoe UI Semibold&quot;;</string>
+                 </property>
+                 <property name="text">
+                  <string>Active Doctors</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignmentFlag::AlignCenter</set>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="lblValueDoctors">
+                 <property name="text">
+                  <string>42 / 50</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QWidget" name="widgetGraphDoctors" native="true"/>
+               </item>
+               <item>
+                <widget class="QLabel" name="lblSubtextDoctors">
+                 <property name="text">
+                  <string>On-Call / ER: 8 / 4</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QFrame" name="frame_2">
+              <property name="styleSheet">
+               <string notr="true">QFrame#frame_2 {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #faf5ff, stop:0.6 #fdfbfe, stop:1 #ffffff);
+    border: 2px solid #e9d5ff;
+    border-radius: 16px;
+    padding: 12px;
+}
+QFrame#frame_2:hover {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #f3e8ff, stop:1 #ffffff);
+    border: 2px solid #c084fc;
+}
+QFrame#frame_2 QLabel {
+    border: none !important;
+    background: transparent !important;
+}
+/* Header: Deep bold royal purple */
+QFrame#frame_2 QLabel:first-child {
+    color: #7e22ce !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    font-family: &quot;Segoe UI&quot;, sans-serif;
+}
+/* Main Value */
+QLabel#lblValuePatients {
+    color: #581c87 !important;
+    font-size: 34px !important;
+    font-weight: 800 !important;
+}
+/* Subtext: Medium dark purple */
+QFrame#frame_2 QLabel:last-child {
+    color: #6b21a8 !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+}</string>
+              </property>
+              <property name="frameShape">
+               <enum>QFrame::Shape::StyledPanel</enum>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Shadow::Raised</enum>
+              </property>
+              <layout class="QVBoxLayout" name="verticalLayout_5">
+               <item>
+                <widget class="QLabel" name="lblTitlePatients">
+                 <property name="styleSheet">
+                  <string notr="true">color: rgb(0, 0, 0);
+font: 600 11pt &quot;Segoe UI Semibold&quot;;</string>
+                 </property>
+                 <property name="text">
+                  <string>Admitted Patients</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignmentFlag::AlignCenter</set>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="lblValuePatients">
+                 <property name="text">
+                  <string>1,245</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QWidget" name="widgetGraphPatients" native="true"/>
+               </item>
+               <item>
+                <widget class="QLabel" name="lblSubtextPatients">
+                 <property name="text">
+                  <string>Live Bed Occupancy: 83%</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QFrame" name="frame">
+              <property name="styleSheet">
+               <string notr="true">QFrame#frame {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #f0fdfa, stop:0.6 #fbfdfd, stop:1 #ffffff);
+    border: 2px solid #99f6e4;
+    border-radius: 16px;
+    padding: 12px;
+}
+QFrame#frame:hover {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #ccfbf1, stop:1 #ffffff);
+    border: 2px solid #2dd4bf;
+}
+QFrame#frame QLabel {
+    border: none !important;
+    background: transparent !important;
+}
+/* Header: Deep bold pine teal */
+QFrame#frame QLabel:first-child {
+    color: #0f766e !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    font-family: &quot;Segoe UI&quot;, sans-serif;
+}
+/* Main Value */
+QLabel#lblValueRevenue {
+    color: #115e59 !important;
+    font-size: 34px !important;
+    font-weight: 800 !important;
+}
+/* Subtext: High-contrast performance teal */
+QFrame#frame QLabel:last-child {
+    color: #0d9488 !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+}</string>
+              </property>
+              <property name="frameShape">
+               <enum>QFrame::Shape::StyledPanel</enum>
+              </property>
+              <property name="frameShadow">
+               <enum>QFrame::Shadow::Raised</enum>
+              </property>
+              <layout class="QVBoxLayout" name="verticalLayout_4">
+               <item>
+                <widget class="QLabel" name="lblTitleRevenue">
+                 <property name="styleSheet">
+                  <string notr="true">color: rgb(0, 0, 0);
+font: 600 11pt &quot;Segoe UI Semibold&quot;;</string>
+                 </property>
+                 <property name="text">
+                  <string>Total Revenue (Today)</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="lblValueRevenue">
+                 <property name="text">
+                  <string>Rs. 1,42,500</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QWidget" name="widgetGraphRevenue" native="true"/>
+               </item>
+               <item>
+                <widget class="QLabel" name="lblSubtextRevenue">
+                 <property name="text">
+                  <string>Target Progress: +12%</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_4">
+            <item>
+             <widget class="QWidget" name="recentPatientsCard" native="true">
+              <layout class="QVBoxLayout" name="verticalLayout_8">
+               <item>
+                <widget class="QLabel" name="label_2">
+                 <property name="layoutDirection">
+                  <enum>Qt::LayoutDirection::LeftToRight</enum>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">font: 600 16pt &quot;Segoe UI Semibold&quot;;
+border:none;</string>
+                 </property>
+                 <property name="text">
+                  <string>Recent Patients</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignmentFlag::AlignCenter</set>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QWidget" name="webContainer" native="true"/>
+               </item>
+              </layout>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="page_2"/>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
  <connections/>
 </ui>

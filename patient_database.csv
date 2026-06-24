@@ -1,0 +1,9 @@
+# patient_id, name, age, gender, diagnosis/treatment, assigned_doctor, status, bed_number
+PT-0001,Aditya Poudel,34,Male,Cardiac Checkup,Dr. Rijal,Admitted,B-101
+PT-0002,Mira Gurung,28,Female,Migraine Treatment,Dr. Subedi,Discharged,B-102
+PT-0003,Hari Rana,52,Male,Fracture Follow-up,Dr. Baral,Admitted,B-103
+PT-0004,Sita Wagle,45,Female,General Physical,Dr. Acharya,Admitted,B-104
+PT-0005,Rajan Shrestha,61,Male,Diabetes Management,Dr. Rijal,Admitted,B-105
+PT-0006,Anita Tamang,39,Female,Hypertension,Dr. Subedi,Discharged,B-106
+PT-0007,Bikash Karki,22,Male,Appendicitis Surgery,Dr. Baral,Admitted,B-107
+PT-0008,Sunita Lama,55,Female,Kidney Stone,Dr. Acharya,Admitted,B-108
