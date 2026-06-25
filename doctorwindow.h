@@ -2,11 +2,14 @@
 #define DOCTORWINDOW_H
 
 #include <QWidget> // Matches the root widget type generated from doctorwindow.ui ("Form")
+#include <QTimer>
+#include <QMainWindow>
 #include "doctor.h"
 
-namespace Ui {
-class DoctorForm; // doctorwindow.ui's <class> tag is "DoctorForm"
-}
+namespace Ui
+{
+class doctorwindow;
+};
 
 class doctorwindow : public QWidget
 {
@@ -16,10 +19,19 @@ public:
     explicit doctorwindow(const QString &employeeName, QWidget *parent = nullptr);
     ~doctorwindow();
 
+private slots:
+    void updateDateTime();
+    void switchPage();
+    void logout();
+    void setupOverviewPage();
+    void setupStatsSection();
+
 private:
-    Ui::DoctorForm *ui;
+    Ui::doctorwindow *ui;
     Doctor *doctorBackend;
     QString currentUserName;
+    QTimer *timer;
+
 };
 
 #endif // DOCTORWINDOW_H
