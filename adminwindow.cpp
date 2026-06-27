@@ -12,6 +12,7 @@
 #include <QScrollArea>
 #include <QScrollBar>
 
+
 // Required native elements
 #include <QtCharts/QChartView>
 #include <QtCharts/QPieSeries>
@@ -29,6 +30,9 @@
 #include <QFormLayout>
 #include <QFrame>
 #include <QSpacerItem>
+#include <QApplication>
+#include <QWebEngineView>
+#include <QUrl>
 
 
 class EditPatientDialog : public QDialog {
@@ -289,15 +293,15 @@ static void applyStatusBadge(QLabel *label, const QString &status) {
 
     if (norm == "admitted" || norm == "checked in" || norm == "present" || norm == "on duty") {
         label->setStyleSheet(
-            "background-color:#dcfce7;color:#15803d;border-radius:6px;"
+            // "background-color:#dcfce7;color:#15803d;border-radius:6px;"
             "font-weight:bold;font-size:11px;padding:4px 8px;border:none;");
     } else if (norm == "discharged" || norm == "no show" || norm == "absent" || norm == "on leave") {
         label->setStyleSheet(
-            "background-color:#fee2e2;color:#b91c1c;border-radius:6px;"
+            // "background-color:#fee2e2;color:#b91c1c;border-radius:6px;"
             "font-weight:bold;font-size:11px;padding:4px 8px;border:none;");
     } else {
         label->setStyleSheet(
-            "background-color:#e0f2fe;color:#0369a1;border-radius:6px;"
+            // "background-color:#e0f2fe;color:#0369a1;border-radius:6px;"
             "font-weight:bold;font-size:11px;padding:4px 8px;border:none;");
     }
 }
@@ -309,15 +313,15 @@ static void applyRoleBadge(QLabel *label, const QString &role) {
     QString r = role.toLower().trimmed();
     if (r == "admin") {
         label->setStyleSheet(
-            "background-color:#fef9c3;color:#854d0e;border-radius:6px;"
+            // "background-color:#fef9c3;color:#854d0e;border-radius:6px;"
             "font-weight:bold;font-size:11px;padding:4px 8px;border:none;");
     } else if (r == "doctor") {
         label->setStyleSheet(
-            "background-color:#dbeafe;color:#1e40af;border-radius:6px;"
+            // "background-color:#dbeafe;color:#1e40af;border-radius:6px;"
             "font-weight:bold;font-size:11px;padding:4px 8px;border:none;");
     } else {
         label->setStyleSheet(
-            "background-color:#f3e8ff;color:#7e22ce;border-radius:6px;"
+            // "background-color:#f3e8ff;color:#7e22ce;border-radius:6px;"
             "font-weight:bold;font-size:11px;padding:4px 8px;border:none;");
     }
 }
@@ -411,7 +415,26 @@ void adminwindow::on_btnMenu_clicked()
 
 void adminwindow::on_btnOverview_clicked()     { if (ui->stackedWidget) ui->stackedWidget->setCurrentIndex(0);  initDashboardGraphs();}
 void adminwindow::on_btnStaffManager_clicked() { if (ui->stackedWidget) ui->stackedWidget->setCurrentIndex(1); }
-void adminwindow::on_btnScheduling_clicked()   { QDesktopServices::openUrl(QUrl("https://calendar.google.com/calendar/u/0/r")); }
+void adminwindow::on_btnScheduling_clicked()
+{
+    ui->stackedWidget->setGeometry(165, 11, 1104, 698);
+
+    // Look for an existing web view child inside the stacked widget
+    QWebEngineView *webView = ui->stackedWidget->findChild<QWebEngineView*>();
+
+    if (!webView) {
+        // If it doesn't exist yet, create it
+        webView = new QWebEngineView(ui->stackedWidget);
+        webView->setUrl(QUrl("https://teamup.com/c/vvud1m/axon-hms"));
+        ui->stackedWidget->addWidget(webView);
+    } else {
+        // Optional: Reload or change the URL if it already exists
+        webView->setUrl(QUrl("https://teamup.com/c/vvud1m/axon-hms"));
+    }
+
+    // Always bring it to focus when clicked
+    ui->stackedWidget->setCurrentWidget(webView);
+}
 
 
 // OVERVIEW — CHARTS
