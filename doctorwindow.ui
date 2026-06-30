@@ -302,27 +302,7 @@ QPushButton::menu-indicator{
          <height>51</height>
         </rect>
        </property>
-       <layout class="QHBoxLayout" name="horizontalLayout_2">
-        <item>
-         <widget class="QLabel" name="lblWelcome">
-          <property name="font">
-           <font>
-            <pointsize>14</pointsize>
-           </font>
-          </property>
-          <property name="styleSheet">
-           <string notr="true">Q,Label#lblWelcome{
-		background-color: transparent;
-		font-size: 24 px;
-		color: #334155;
-}</string>
-          </property>
-          <property name="text">
-           <string>Good morning, Dr. </string>
-          </property>
-         </widget>
-        </item>
-       </layout>
+       <layout class="QHBoxLayout" name="horizontalLayout_2"/>
       </widget>
       <widget class="QWidget" name="statsContainer" native="true">
        <property name="geometry">

@@ -18,6 +18,8 @@ doctorwindow::doctorwindow(const QString &employeeName, QWidget *parent) :
     currentUserName(employeeName) // Initialize your member variable
 {
     ui->setupUi(this);
+    if (ui->message)
+        ui->message->setText(QString("Welcome, Dr. %1!").arg(currentUserName));
 
     //Clock
     timer= new QTimer(this);
