@@ -34,7 +34,7 @@
 #include <QWebEngineView>
 #include <QUrl>
 
-
+// QDialogue for EditPatient Button
 class EditPatientDialog : public QDialog {
 public:
     QLineEdit *nameEdit;
@@ -93,7 +93,7 @@ public:
     }
 };
 
-
+// QDialogue for AddStaff Button
 class AddStaffDialog : public QDialog {
 public:
     QLineEdit *usernameEdit;
