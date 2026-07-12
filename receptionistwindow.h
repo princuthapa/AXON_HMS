@@ -4,7 +4,9 @@
 #include <QWidget>
 #include <QTimer>
 #include <QDateTime>
-
+#include <QFile>
+#include <QTextStream>
+#include <QMessageBox>
 QT_BEGIN_NAMESPACE
 namespace Ui { class ReceptionistWindow; }
 QT_END_NAMESPACE
@@ -29,6 +31,8 @@ private slots:
     void onClearFormClicked();
     void onSubmitRegistrationClicked();
     void updateDateTime();
+    void onBookAppointmentClicked(); // Handles click event
+    void loadAppointmentsFromCSV();  // Loads data into the table
 
 private:
     Ui::ReceptionistWindow *ui;
