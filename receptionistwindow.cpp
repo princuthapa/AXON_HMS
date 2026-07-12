@@ -68,6 +68,27 @@ ReceptionistWindow::ReceptionistWindow(QWidget *parent)
             // 2. Close this receptionist window
             this->close();
         });
+    ui->tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->tableWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
+    // 2. Populate Dropdowns with mock data
+    ui->doctorComboBox->addItems({"Select Doctor", "Dr. A.K. Sharma", "Dr. Sarah Jenkins", "Dr. Michael Chang"});
+    ui->deptComboBox->addItems({"Select Department", "Cardiology", "Neurology", "Pediatrics", "General Medicine"});
+
+    ui->timeSlotComboBox->addItems({"Select Time Slot", "09:00 AM", "09:30 AM", "10:00 AM", "10:30 AM",
+                                    "11:00 AM", "11:30 AM", "02:00 PM", "02:30 PM", "03:00 PM"});
+
+    // 3. Connect the Book Appointment button to the slot logic
+    connect(ui->bookAppointmentBtn, &QPushButton::clicked, this, &ReceptionistWindow::onBookAppointmentClicked);
+
+    // 4. Load any existing records out of your CSV file straight into the table grid
+    loadAppointmentsFromCSV();
+    dateTimeTimer = new QTimer(this);
+    connect(dateTimeTimer, &QTimer::timeout, this, &ReceptionistWindow::updateDateTime);
+    dateTimeTimer->start(1000); // Ticks every 1 second
+
+    // Call it immediately so the label isn't blank on startup
+    updateDateTime();
 
 }
 
@@ -249,4 +270,97 @@ void ReceptionistWindow::onSubmitRegistrationClicked()
 
     // 5. CLEAR FORM
     onClearFormClicked();
+}
+void ReceptionistWindow::updateDateTime() {
+    QDateTime current = QDateTime::currentDateTime();
+
+    // Formats precisely to: "Sat Jul 11 2026, 09:27 PM"
+    QString dateText = current.toString("ddd MMM dd yyyy, hh:mm AP");
+
+    ui->dateLabel->setText(dateText);
+}
+void ReceptionistWindow::onBookAppointmentClicked() {
+    // 1. Extract values from UI items
+    QString patient = ui->patientNameLineEdit->text().trimmed();
+    QString doctor = ui->doctorComboBox->currentText();
+    QString time = ui->timeSlotComboBox->currentText();
+    QString dept = ui->deptComboBox->currentText();
+    QString reason = ui->reasonTextEdit->toPlainText().trimmed();
+    QString status = "Confirmed"; // Default booking status
+
+    // 2. Simple validation guard rails
+    if (patient.isEmpty() || doctor == "Select Doctor" || time == "Select Time Slot" || reason.isEmpty()) {
+        QMessageBox::warning(this, "Input Error", "Please fill out all patient information fields completely!");
+        return;
+    }
+
+    // 3. SAVE TO CSV DATABASE FILE
+    QFile file("appointments.csv");
+    // Open in Append mode so we add rows without erasing existing histories
+    if (file.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text)) {
+        QTextStream out(&file);
+        // Standard CSV format escaping values: Patient, Doctor, Time, Status, Department, Reason
+        out << "\"" << patient << "\",\""
+            << doctor << "\",\""
+            << time << "\",\""
+            << status << "\",\""
+            << dept << "\",\""
+            << reason << "\"\n";
+        file.close();
+    } else {
+        QMessageBox::critical(this, "Database Error", "Could not open data storage file for writing!");
+        return;
+    }
+
+    // 4. ADD DIRECTLY TO THE LIVE TABLE VIEW
+    int rowCount = ui->tableWidget->rowCount();
+    ui->tableWidget->insertRow(rowCount);
+
+    ui->tableWidget->setItem(rowCount, 0, new QTableWidgetItem(patient));
+    ui->tableWidget->setItem(rowCount, 1, new QTableWidgetItem(doctor));
+    ui->tableWidget->setItem(rowCount, 2, new QTableWidgetItem(time));
+    ui->tableWidget->setItem(rowCount, 3, new QTableWidgetItem(status));
+
+    // 5. Clear fields for next entry
+    ui->patientNameLineEdit->clear();
+    ui->reasonTextEdit->clear();
+    ui->doctorComboBox->setCurrentIndex(0);
+    ui->deptComboBox->setCurrentIndex(0);
+    ui->timeSlotComboBox->setCurrentIndex(0);
+
+    QMessageBox::information(this, "Success", "Appointment registered successfully!");
+}
+
+void ReceptionistWindow::loadAppointmentsFromCSV() {
+    // Clear out any test design headers/rows built into the UI grid beforehand
+    ui->tableWidget->setRowCount(0);
+
+    QFile file("appointments.csv");
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        // File doesn't exist yet, which is completely fine for the first launch
+        return;
+    }
+
+    QTextStream in(&file);
+    while (!in.atEnd()) {
+        QString line = in.readLine();
+        // Split row parsing logic safely splitting standard text lines by commas
+        // Note: Simple split by comma. Remove extra quote notations saved into string rows
+        QStringList rowData = line.split(",");
+        if (rowData.size() >= 4) {
+            int rowCount = ui->tableWidget->rowCount();
+            ui->tableWidget->insertRow(rowCount);
+
+            QString pName = rowData[0].remove("\"");
+            QString dName = rowData[1].remove("\"");
+            QString tSlot = rowData[2].remove("\"");
+            QString stat = rowData[3].remove("\"");
+
+            ui->tableWidget->setItem(rowCount, 0, new QTableWidgetItem(pName));
+            ui->tableWidget->setItem(rowCount, 1, new QTableWidgetItem(dName));
+            ui->tableWidget->setItem(rowCount, 2, new QTableWidgetItem(tSlot));
+            ui->tableWidget->setItem(rowCount, 3, new QTableWidgetItem(stat));
+        }
+    }
+    file.close();
 }

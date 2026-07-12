@@ -13,5 +13,6 @@
     <qresource prefix="/database">
         <file>staff_database.csv</file>
         <file>patient_database.csv</file>
+        <file>appointment_database.csv</file>
     </qresource>
 </RCC>

@@ -14,6 +14,9 @@
 #include "patientmanager.h"
 #include <QtCharts/QChartView>
 #include <QtCharts/QChart>
+#include <QTimer>
+#include <QDateTime>
+
 
 namespace Ui {
 class AXON_ADMIN;
@@ -38,6 +41,7 @@ private slots:
     void on_btnStaffManager_clicked();
     void on_btnScheduling_clicked();
     void onAddStaffClicked();
+
 
 private:
     Ui::AXON_ADMIN *ui;
