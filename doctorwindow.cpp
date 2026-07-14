@@ -11,6 +11,7 @@
 #include <QAction>
 #include <QPushButton>
 #include <QDateTime>
+#include <QWebEngineView>
 
 doctorwindow::doctorwindow(const QString &employeeName, QWidget *parent) :
     QWidget(parent),
@@ -30,7 +31,7 @@ doctorwindow::doctorwindow(const QString &employeeName, QWidget *parent) :
     //SideBar Navigation
     connect(ui->overviewBtn, &QPushButton::clicked, this, &doctorwindow::switchPage);
     connect(ui->patientlistBtn, &QPushButton::clicked, this, &doctorwindow::switchPage);
-    connect(ui->scheduleBtn, &QPushButton::clicked, this, &doctorwindow::switchPage);
+    // connect(ui->scheduleBtn, &QPushButton::clicked, this, &doctorwindow::switchPage);
     ui->stackedWidget->setCurrentIndex(0);
 
     //Logout Menu
@@ -317,3 +318,21 @@ ui->appointmentsTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
 ui->appointmentsTable->selectRow(0);
 
 }
+void doctorwindow::on_scheduleBtn_clicked()
+{
+
+
+        ui->stackedWidget->setGeometry(165, 11, 1104, 698);
+
+        QWebEngineView *webView = ui->stackedWidget->findChild<QWebEngineView*>();
+        if (!webView) {
+            webView = new QWebEngineView(ui->stackedWidget);
+            webView->setUrl(QUrl("https://teamup.com/c/vvud1m/axon-hms"));
+            ui->stackedWidget->addWidget(webView);
+        } else {
+            webView->setUrl(QUrl("https://teamup.com/c/vvud1m/axon-hms"));
+        }
+        ui->stackedWidget->setCurrentWidget(webView);
+
+}
+

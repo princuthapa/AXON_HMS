@@ -26,6 +26,8 @@ private slots:
     void setupOverviewPage();
     void setupStatsSection();
 
+    void on_scheduleBtn_clicked();
+
 private:
     Ui::doctorwindow *ui;
     Doctor *doctorBackend;
