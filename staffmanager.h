@@ -10,7 +10,7 @@ class QWidget;
 class QLineEdit;
 class QComboBox;
 
-// Full staff record — includes auth credentials plus profile data.
+
 // CSV format: username,password,Role,staff_id,full_name,age,gender,phone
 struct StaffData {
     QString username;
@@ -38,6 +38,10 @@ public:
     QVector<StaffData> getAllStaff() const;
     bool updateStaff(const StaffData &updated);
     int  getTotalCount() const;
+
+    // Re-reads staff_database.csv from disk (e.g. so Receptionist's
+    // "Assign Doctor" dropdown reflects doctors Admin has just added).
+    void reload();
 
 private:
     QVector<StaffData> staffList;

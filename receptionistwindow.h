@@ -7,6 +7,10 @@
 #include <QFile>
 #include <QTextStream>
 #include <QMessageBox>
+#include "patientmanager.h"
+#include "staffmanager.h"
+#include "appointmentmanager.h"
+
 QT_BEGIN_NAMESPACE
 namespace Ui { class ReceptionistWindow; }
 QT_END_NAMESPACE
@@ -31,17 +35,26 @@ private slots:
     void onClearFormClicked();
     void onSubmitRegistrationClicked();
     void updateDateTime();
-    void onBookAppointmentClicked(); // Handles click event
-    void loadAppointmentsFromCSV();  // Loads data into the table
-
+    void onBookAppointmentClicked();
 private:
     Ui::ReceptionistWindow *ui;
 
-    // Helper functions to keep code clean
+
+    PatientManager     *patientMgr;
+    StaffManager       *staffMgr;
+    AppointmentManager *apptMgr;
+
+
     void setupConnections();
     void refreshDashboardData();
     void populateAppointmentsTable();
     void populateRecentPatientsTable();
+
+    void populateDoctorDropdowns();     // fills doctorbox / doctorComboBox from StaffManager
+    void refreshScheduleTable();        // fills the Scheduling page's tableWidget from AppointmentManager
+    void refreshRegisteredPatientsList();// fills listRecentPatientsReg from PatientManager
+    void addPatientListItem(const Patient &p); // builds one custom list row widget
+
     QTimer *dateTimeTimer;
 };
 

@@ -11,7 +11,19 @@
 #include <QAction>
 #include <QPushButton>
 #include <QDateTime>
-#include <QWebEngineView>
+#include <QFrame>
+#include <QScrollArea>
+#include <QComboBox>
+
+static const QString kPlainLabelD =
+    "border:none;background:transparent;background-color:transparent;";
+
+static void applyStatusBadgeD(QLabel *label, const QString &status) {
+    label->setText(status.toUpper());
+    label->setAlignment(Qt::AlignCenter);
+    label->setStyleSheet("font-weight:bold;font-size:11px;padding:4px 8px;border:none;"
+                          "background-color:#e8f0fe;color:#1a4f8a;border-radius:10px;");
+}
 
 doctorwindow::doctorwindow(const QString &employeeName, QWidget *parent) :
     QWidget(parent),
@@ -22,6 +34,10 @@ doctorwindow::doctorwindow(const QString &employeeName, QWidget *parent) :
     if (ui->message)
         ui->message->setText(QString("Welcome, Dr. %1!").arg(currentUserName));
 
+    // Shared backend — same CSVs Admin & Receptionist windows read/write.
+    patientMgr = new PatientManager();
+    apptMgr    = new AppointmentManager();
+
     //Clock
     timer= new QTimer(this);
     connect(timer, &QTimer::timeout, this, &doctorwindow::updateDateTime);
@@ -31,7 +47,7 @@ doctorwindow::doctorwindow(const QString &employeeName, QWidget *parent) :
     //SideBar Navigation
     connect(ui->overviewBtn, &QPushButton::clicked, this, &doctorwindow::switchPage);
     connect(ui->patientlistBtn, &QPushButton::clicked, this, &doctorwindow::switchPage);
-    // connect(ui->scheduleBtn, &QPushButton::clicked, this, &doctorwindow::switchPage);
+    connect(ui->scheduleBtn, &QPushButton::clicked, this, &doctorwindow::switchPage);
     ui->stackedWidget->setCurrentIndex(0);
 
     //Logout Menu
@@ -67,6 +83,8 @@ doctorwindow::doctorwindow(const QString &employeeName, QWidget *parent) :
 
     setupStatsSection();
     setupOverviewPage();
+    setupPatientListPage();
+    setupSchedulingPage();
 
     doctorBackend = new Doctor();
 
@@ -76,6 +94,8 @@ doctorwindow::doctorwindow(const QString &employeeName, QWidget *parent) :
 doctorwindow::~doctorwindow()
 {
     delete doctorBackend;
+    delete patientMgr;
+    delete apptMgr;
     delete ui;
 }
 
@@ -92,16 +112,23 @@ void doctorwindow::switchPage()
     if(btn==ui->overviewBtn)
     {
         ui->stackedWidget->setCurrentIndex(0);
+        patientMgr->reload();
+        apptMgr->reload();
+        setupOverviewPage();
     }
 
     else if(btn==ui->patientlistBtn)
     {
         ui->stackedWidget->setCurrentIndex(1);
+        patientMgr->reload();
+        refreshPatientList();
     }
 
     else if(btn==ui->scheduleBtn)
     {
         ui->stackedWidget->setCurrentIndex(2);
+        apptMgr->reload();
+        refreshSchedulingTable();
     }
 }
 
@@ -132,6 +159,20 @@ void doctorwindow::setupStatsSection()
     newLayout->setSpacing(15);
     newLayout->setContentsMargins(0, 0, 0, 0);
 
+    // Pull real numbers for THIS doctor from the shared patient database
+    patientMgr->reload();
+    QVector<Patient> myPatients;
+    for (const auto &p : patientMgr->getAllPatients()) {
+        if (p.assignedDoctor.trimmed().compare(currentUserName.trimmed(), Qt::CaseInsensitive) == 0)
+            myPatients.append(p);
+    }
+    int totalPatients = myPatients.size();
+    int admitted = 0, discharged = 0;
+    for (const auto &p : myPatients) {
+        if (p.status.trimmed().compare("Discharged", Qt::CaseInsensitive) == 0) discharged++;
+        else admitted++;
+    }
+
     // Create the stats data
     struct StatData {
         QString number;
@@ -141,9 +182,9 @@ void doctorwindow::setupStatsSection()
     };
 
     QList<StatData> stats = {
-        {"990", "Total Patients", "", true},
-        {"67", "New Patients", "↓ 39% vs last month", false},
-        {"27", "Returning Patients", "↓ 4% vs last month", false}
+        {QString::number(totalPatients), "Total Patients", "", true},
+        {QString::number(admitted),      "Currently Admitted", "", true},
+        {QString::number(discharged),    "Discharged", "", false}
     };
 
     // Each stat card
@@ -207,7 +248,7 @@ void doctorwindow::setupOverviewPage()
 
     setupStatsSection();
 
-    ui->lblPatientsTitle->setText("Patients Today");
+    ui->lblPatientsTitle->setText("My Patients");
     ui->lblPatientsTitle->setStyleSheet(
         "font-size: 16px;"
         "font-weight: bold;"
@@ -215,11 +256,19 @@ void doctorwindow::setupOverviewPage()
         "padding: 5px 0px 10px 0px;"
         );
 
+    // Real patients assigned to this doctor (same patient_database.csv
+    // Admin & Receptionist use — no more hard-coded mock names)
+    patientMgr->reload();
     ui->patientListWidget->clear();
-    ui->patientListWidget->addItem("Sarah Hostem - Bronchitis (10:30 am)");
-    ui->patientListWidget->addItem("John Smith - Flu (11:00 am)");
-    ui->patientListWidget->addItem("Maria Rivera - Checkup (1:00 pm)");
-    ui->patientListWidget->addItem("David Chen - Follow-up (2:30 pm)");
+    for (const auto &p : patientMgr->getAllPatients()) {
+        if (p.assignedDoctor.trimmed().compare(currentUserName.trimmed(), Qt::CaseInsensitive) != 0)
+            continue;
+        QString line = QString("%1 — %2 (%3)")
+                           .arg(p.name, p.diagnosisTreatment, p.status);
+        ui->patientListWidget->addItem(line);
+    }
+    if (ui->patientListWidget->count() == 0)
+        ui->patientListWidget->addItem("No patients currently assigned.");
 
     ui->patientListWidget->setStyleSheet(
         "QListWidget {"
@@ -246,93 +295,315 @@ void doctorwindow::setupOverviewPage()
         "padding: 10px 0px;"
         );
 
-    // The tabel
-    ui->appointmentsTable->setColumnCount(5);
+    // The table
+    ui->appointmentsTable->clearContents();
+    ui->appointmentsTable->setRowCount(0);
+    ui->appointmentsTable->setColumnCount(4);
     ui->appointmentsTable->setHorizontalHeaderLabels(
-        QStringList() << "Time" << "Patient" << "Reason" << "Amount" << "Status"
+        QStringList() << "Time" << "Patient" << "Reason" << "Status"
         );
 
+    ui->appointmentsTable->setColumnWidth(0, 90);
+    ui->appointmentsTable->setColumnWidth(1, 130);
+    ui->appointmentsTable->setColumnWidth(2, 140);
+    ui->appointmentsTable->setColumnWidth(3, 90);
 
-    ui->appointmentsTable->setColumnWidth(0, 80);
-    ui->appointmentsTable->setColumnWidth(1, 120);
-    ui->appointmentsTable->setColumnWidth(2, 150);
-    ui->appointmentsTable->setColumnWidth(3, 70);
-    ui->appointmentsTable->setColumnWidth(4, 90);
+    // Real appointments for this doctor, filtered to today, from the
+    // shared appointment_database.csv (replaces the TeamUp calendar embed)
+    apptMgr->reload();
+    QVector<Appointment> todaysForDoctor;
+    for (const auto &a : apptMgr->getTodaysAppointments()) {
+        if (a.doctorName.trimmed().compare(currentUserName.trimmed(), Qt::CaseInsensitive) == 0)
+            todaysForDoctor.append(a);
+    }
 
-    QStringList times = {"10:00 AM", "10:30 AM", "11:00 AM", "1:00 PM"};
-    QStringList patients = {"Shawn Hampton", "Polly Paul", "John Doe", "Maria Rivera"};
-    QStringList reasons = {"Emergency", "USG Consultation", "Laboratory Screening", "General Checkup"};
-    QStringList amounts = {"$30", "$50", "$70", "$25"};
-    QStringList statuses = {"Now", "Confirmed", "Confirmed", "Pending"};
-
-    for (int row = 0; row < 4; row++) {
+    for (int row = 0; row < todaysForDoctor.size(); row++) {
+        const Appointment &a = todaysForDoctor[row];
         ui->appointmentsTable->insertRow(row);
-        QTableWidgetItem *timeItem = new QTableWidgetItem(times[row]);
-        QTableWidgetItem *patientItem = new QTableWidgetItem(patients[row]);
-        QTableWidgetItem *reasonItem = new QTableWidgetItem(reasons[row]);
-        QTableWidgetItem *amountItem = new QTableWidgetItem(amounts[row]);
-        QTableWidgetItem *statusItem = new QTableWidgetItem(statuses[row]);
+        QTableWidgetItem *timeItem    = new QTableWidgetItem(a.time);
+        QTableWidgetItem *patientItem = new QTableWidgetItem(a.patientName);
+        QTableWidgetItem *reasonItem  = new QTableWidgetItem(a.reason);
+        QTableWidgetItem *statusItem  = new QTableWidgetItem(a.status);
 
-        // Color-code status column
-        QString status = statuses[row];
-        if (status == "Now") {
+        QString status = a.status.trimmed();
+        if (status.compare("Confirmed", Qt::CaseInsensitive) == 0) {
+            statusItem->setForeground(QColor("#27ae60"));
+        } else if (status.compare("Waiting", Qt::CaseInsensitive) == 0 ||
+                   status.compare("Pending", Qt::CaseInsensitive) == 0) {
             statusItem->setBackground(QColor("#fff3cd"));
             statusItem->setForeground(QColor("#856404"));
-        } else if (status == "Confirmed") {
-            statusItem->setForeground(QColor("#27ae60"));
-        } else if (status == "Pending") {
-            statusItem->setForeground(QColor("#f39c12"));
+        } else if (status.compare("Cancelled", Qt::CaseInsensitive) == 0) {
+            statusItem->setForeground(QColor("#e74c3c"));
         }
 
-        // Add to table
         ui->appointmentsTable->setItem(row, 0, timeItem);
         ui->appointmentsTable->setItem(row, 1, patientItem);
         ui->appointmentsTable->setItem(row, 2, reasonItem);
-        ui->appointmentsTable->setItem(row, 3, amountItem);
-        ui->appointmentsTable->setItem(row, 4, statusItem);
+        ui->appointmentsTable->setItem(row, 3, statusItem);
     }
 
-// Style the table
-ui->appointmentsTable->setStyleSheet(
-    "QTableWidget {"
-    "   background-color: #ffffff;"
-    "   border: 1px solid #e9ecef;"
-    "   border-radius: 8px;"
-    "   gridline-color: #f0f0f0;"
-    "}"
-    "QTableWidget::item {"
-    "   padding: 8px;"
-    "}"
-    "QHeaderView::section {"
-    "   background-color: #f8f9fa;"
-    "   padding: 8px;"
-    "   border: none;"
-    "   font-weight: bold;"
-    "   color: #2c3e50;"
-    "}"
-    );
+    // Style the table
+    ui->appointmentsTable->setStyleSheet(
+        "QTableWidget {"
+        "   background-color: #ffffff;"
+        "   border: 1px solid #e9ecef;"
+        "   border-radius: 8px;"
+        "   gridline-color: #f0f0f0;"
+        "}"
+        "QTableWidget::item {"
+        "   padding: 8px;"
+        "}"
+        "QHeaderView::section {"
+        "   background-color: #f8f9fa;"
+        "   padding: 8px;"
+        "   border: none;"
+        "   font-weight: bold;"
+        "   color: #2c3e50;"
+        "}"
+        );
 
-// Hide row numbers and make read-only
-ui->appointmentsTable->verticalHeader()->setVisible(false);
-ui->appointmentsTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
-ui->appointmentsTable->selectRow(0);
-
+    // Hide row numbers and make read-only
+    ui->appointmentsTable->verticalHeader()->setVisible(false);
+    ui->appointmentsTable->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    if (ui->appointmentsTable->rowCount() > 0)
+        ui->appointmentsTable->selectRow(0);
 }
-void doctorwindow::on_scheduleBtn_clicked()
+
+//  Patient List page
+// Builds a scrollable roster of every patient assigned to this doctor,
+// read live from the same patient_database.csv Admin/Receptionist use.
+
+void doctorwindow::setupPatientListPage()
 {
+    QWidget *page = ui->pagePatient;
+    if (!page) return;
 
-
-        ui->stackedWidget->setGeometry(165, 11, 1104, 698);
-
-        QWebEngineView *webView = ui->stackedWidget->findChild<QWebEngineView*>();
-        if (!webView) {
-            webView = new QWebEngineView(ui->stackedWidget);
-            webView->setUrl(QUrl("https://teamup.com/c/vvud1m/axon-hms"));
-            ui->stackedWidget->addWidget(webView);
-        } else {
-            webView->setUrl(QUrl("https://teamup.com/c/vvud1m/axon-hms"));
+    if (page->layout()) {
+        QLayoutItem *item;
+        while ((item = page->layout()->takeAt(0))) {
+            if (item->widget()) item->widget()->deleteLater();
+            delete item;
         }
-        ui->stackedWidget->setCurrentWidget(webView);
+        delete page->layout();
+    }
 
+    QVBoxLayout *pageLayout = new QVBoxLayout(page);
+    pageLayout->setContentsMargins(20, 16, 20, 16);
+    pageLayout->setSpacing(12);
+
+    QLabel *title = new QLabel("My Patients");
+    title->setStyleSheet("font-size:20px;font-weight:700;color:#0f172a;border:none;background:transparent;");
+    pageLayout->addWidget(title);
+
+    patientCountLabel = new QLabel();
+    patientCountLabel->setStyleSheet("font-size:13px;color:#64748b;border:none;background:transparent;");
+    pageLayout->addWidget(patientCountLabel);
+
+    // Column header bar
+    QWidget *colHeader = new QWidget();
+    colHeader->setStyleSheet("background-color:#f8fafc;border-bottom:2px solid #e2e8f0;");
+    QHBoxLayout *chLayout = new QHBoxLayout(colHeader);
+    chLayout->setContentsMargins(16, 8, 16, 8);
+    chLayout->setSpacing(10);
+    const QString chStyle = "font-weight:700;font-size:11px;color:#94a3b8;" + kPlainLabelD;
+    auto makeCol = [&](const QString &txt, int s) {
+        QLabel *l = new QLabel(txt); l->setStyleSheet(chStyle);
+        chLayout->addWidget(l, s);
+    };
+    makeCol("PATIENT ID", 1); makeCol("NAME", 2); makeCol("AGE", 1);
+    makeCol("GENDER", 1); makeCol("DIAGNOSIS/PROBLEM", 3); makeCol("STATUS", 1);
+    pageLayout->addWidget(colHeader);
+
+    // Scrollable rows area
+    QScrollArea *scroll = new QScrollArea();
+    scroll->setWidgetResizable(true);
+    scroll->setFrameShape(QFrame::NoFrame);
+    scroll->setStyleSheet("QScrollArea{border:none;background:transparent;}");
+
+    patientRowContainer = new QWidget();
+    patientRowContainer->setStyleSheet("background:transparent;");
+    patientRowsLayout = new QVBoxLayout(patientRowContainer);
+    patientRowsLayout->setContentsMargins(0, 0, 0, 0);
+    patientRowsLayout->setSpacing(0);
+    patientRowsLayout->addStretch();
+
+    scroll->setWidget(patientRowContainer);
+    pageLayout->addWidget(scroll, 1);
+
+    refreshPatientList();
 }
 
+void doctorwindow::refreshPatientList()
+{
+    if (!patientRowsLayout) return;
+
+    while (patientRowsLayout->count() > 1) {
+        QLayoutItem *item = patientRowsLayout->takeAt(0);
+        if (item->widget()) item->widget()->deleteLater();
+        delete item;
+    }
+
+    int count = 0;
+    for (const auto &p : patientMgr->getAllPatients()) {
+        if (p.assignedDoctor.trimmed().compare(currentUserName.trimmed(), Qt::CaseInsensitive) != 0)
+            continue;
+        addPatientRow(p);
+        count++;
+    }
+
+    if (patientCountLabel)
+        patientCountLabel->setText(QString("Total Patients Assigned: <b>%1</b>").arg(count));
+}
+
+void doctorwindow::addPatientRow(const Patient &p)
+{
+    QFrame *row = new QFrame();
+    row->setObjectName("docPatientRow");
+    row->setStyleSheet(
+        "QFrame#docPatientRow{background-color:#ffffff;border-bottom:1px solid #f1f5f9;}"
+        "QFrame#docPatientRow:hover{background-color:#f8fafc;}");
+
+    QHBoxLayout *rl = new QHBoxLayout(row);
+    rl->setContentsMargins(16, 10, 16, 10);
+    rl->setSpacing(10);
+
+    QLabel *lblId       = new QLabel(p.id);
+    QLabel *lblName     = new QLabel(p.name);
+    QLabel *lblAge      = new QLabel(p.age);
+    QLabel *lblGender   = new QLabel(p.gender);
+    QLabel *lblProblem  = new QLabel(p.diagnosisTreatment);
+    QLabel *lblStatus   = new QLabel();
+
+    lblId->setStyleSheet("font-weight:bold;color:#64748b;" + kPlainLabelD);
+    lblName->setStyleSheet("font-weight:bold;color:#1e293b;" + kPlainLabelD);
+    lblAge->setStyleSheet("color:#334155;" + kPlainLabelD);
+    lblGender->setStyleSheet("color:#334155;" + kPlainLabelD);
+    lblProblem->setStyleSheet("color:#334155;" + kPlainLabelD);
+    applyStatusBadgeD(lblStatus, p.status);
+
+    rl->addWidget(lblId,      1);
+    rl->addWidget(lblName,    2);
+    rl->addWidget(lblAge,     1);
+    rl->addWidget(lblGender,  1);
+    rl->addWidget(lblProblem, 3);
+    rl->addWidget(lblStatus,  1);
+    row->setLayout(rl);
+
+    patientRowsLayout->insertWidget(patientRowsLayout->count() - 1, row);
+}
+
+
+
+void doctorwindow::setupSchedulingPage()
+{
+    QWidget *page = ui->pageScheduling;
+    if (!page) return;
+
+    if (page->layout()) {
+        QLayoutItem *item;
+        while ((item = page->layout()->takeAt(0))) {
+            if (item->widget()) item->widget()->deleteLater();
+            delete item;
+        }
+        delete page->layout();
+    }
+
+    QVBoxLayout *pageLayout = new QVBoxLayout(page);
+    pageLayout->setContentsMargins(20, 16, 20, 16);
+    pageLayout->setSpacing(12);
+
+    QLabel *title = new QLabel("My Schedule");
+    title->setStyleSheet("font-size:20px;font-weight:700;color:#0f172a;border:none;background:transparent;");
+    pageLayout->addWidget(title);
+
+    scheduleCountLabel = new QLabel();
+    scheduleCountLabel->setStyleSheet("font-size:13px;color:#64748b;border:none;background:transparent;");
+    pageLayout->addWidget(scheduleCountLabel);
+
+    // Column header bar
+    QWidget *colHeader = new QWidget();
+    colHeader->setStyleSheet("background-color:#f8fafc;border-bottom:2px solid #e2e8f0;");
+    QHBoxLayout *chLayout = new QHBoxLayout(colHeader);
+    chLayout->setContentsMargins(16, 8, 16, 8);
+    chLayout->setSpacing(10);
+    const QString chStyle = "font-weight:700;font-size:11px;color:#94a3b8;" + kPlainLabelD;
+    auto makeCol = [&](const QString &txt, int s) {
+        QLabel *l = new QLabel(txt); l->setStyleSheet(chStyle);
+        chLayout->addWidget(l, s);
+    };
+    makeCol("DATE", 2); makeCol("TIME", 1); makeCol("PATIENT", 2);
+    makeCol("DEPARTMENT", 2); makeCol("REASON", 3); makeCol("STATUS", 1);
+    pageLayout->addWidget(colHeader);
+
+    QScrollArea *scroll = new QScrollArea();
+    scroll->setWidgetResizable(true);
+    scroll->setFrameShape(QFrame::NoFrame);
+    scroll->setStyleSheet("QScrollArea{border:none;background:transparent;}");
+
+    scheduleRowContainer = new QWidget();
+    scheduleRowContainer->setStyleSheet("background:transparent;");
+    scheduleRowsLayout = new QVBoxLayout(scheduleRowContainer);
+    scheduleRowsLayout->setContentsMargins(0, 0, 0, 0);
+    scheduleRowsLayout->setSpacing(0);
+    scheduleRowsLayout->addStretch();
+
+    scroll->setWidget(scheduleRowContainer);
+    pageLayout->addWidget(scroll, 1);
+
+    refreshSchedulingTable();
+}
+
+void doctorwindow::refreshSchedulingTable()
+{
+    if (!scheduleRowsLayout) return;
+
+    while (scheduleRowsLayout->count() > 1) {
+        QLayoutItem *item = scheduleRowsLayout->takeAt(0);
+        if (item->widget()) item->widget()->deleteLater();
+        delete item;
+    }
+
+    QVector<Appointment> mine = apptMgr->getAppointmentsForDoctor(currentUserName);
+    for (const auto &a : mine)
+        addScheduleRow(a);
+
+    if (scheduleCountLabel)
+        scheduleCountLabel->setText(QString("Total Appointments: <b>%1</b>").arg(mine.size()));
+}
+
+void doctorwindow::addScheduleRow(const Appointment &a)
+{
+    QFrame *row = new QFrame();
+    row->setObjectName("docScheduleRow");
+    row->setStyleSheet(
+        "QFrame#docScheduleRow{background-color:#ffffff;border-bottom:1px solid #f1f5f9;}"
+        "QFrame#docScheduleRow:hover{background-color:#f8fafc;}");
+
+    QHBoxLayout *rl = new QHBoxLayout(row);
+    rl->setContentsMargins(16, 10, 16, 10);
+    rl->setSpacing(10);
+
+    QLabel *lblDate   = new QLabel(a.date);
+    QLabel *lblTime   = new QLabel(a.time);
+    QLabel *lblPat    = new QLabel(a.patientName);
+    QLabel *lblDept   = new QLabel(a.department);
+    QLabel *lblReason = new QLabel(a.reason);
+    QLabel *lblStatus = new QLabel();
+
+    lblDate->setStyleSheet("font-weight:bold;color:#64748b;" + kPlainLabelD);
+    lblTime->setStyleSheet("color:#334155;" + kPlainLabelD);
+    lblPat->setStyleSheet("font-weight:bold;color:#1e293b;" + kPlainLabelD);
+    lblDept->setStyleSheet("color:#334155;" + kPlainLabelD);
+    lblReason->setStyleSheet("color:#334155;" + kPlainLabelD);
+    applyStatusBadgeD(lblStatus, a.status);
+
+    rl->addWidget(lblDate,   2);
+    rl->addWidget(lblTime,   1);
+    rl->addWidget(lblPat,    2);
+    rl->addWidget(lblDept,   2);
+    rl->addWidget(lblReason, 3);
+    rl->addWidget(lblStatus, 1);
+    row->setLayout(rl);
+
+    scheduleRowsLayout->insertWidget(scheduleRowsLayout->count() - 1, row);
+}

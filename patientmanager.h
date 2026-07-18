@@ -11,26 +11,31 @@ class QWidget;
 class QLineEdit;
 class QComboBox;
 
-// Manages the patient roster with file-backed CSV persistence.
-// Sits between Doctor / Receptionist and the actual patient data.
+
 class PatientManager
 {
 public:
     PatientManager();
 
-    // CRUD — matching the class diagram
+
     void addPatient(const Patient &newPatient);
     void removePatient(const QString &patientId);
     Patient searchPatient(const QString &patientId);
 
-    // Clinical operations
+
     void diagnose(const QString &patientId, const QString &diagnosis);
     void treat(const QString &patientId, const QString &treatment);
     void discharge(const QString &patientId);
 
-    // Utility accessors used by the Admin window
+
     QVector<Patient> getAllPatients() const;
     int getTotalCount() const;
+
+
+    QString generateNextId() const;
+
+
+    void reload();
 
 private:
     QVector<Patient> patientList;
@@ -39,7 +44,7 @@ private:
     void _parseStream(QTextStream &in);
 };
 
-// ── Dialog factory (replaces the old EditPatientDialog QDialog subclass) ───
+
 // Builds a "Modify Patient Record" dialog and hands back pointers to the
 // editable fields via the out-parameters so the caller can read the values
 // once dlg->exec() == QDialog::Accepted. Caller owns / deletes the dialog

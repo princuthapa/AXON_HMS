@@ -1,10 +1,15 @@
 #ifndef DOCTORWINDOW_H
 #define DOCTORWINDOW_H
 
-#include <QWidget> // Matches the root widget type generated from doctorwindow.ui ("Form")
+#include <QWidget>
 #include <QTimer>
 #include <QMainWindow>
+#include <QVBoxLayout>
+#include <QScrollArea>
+#include <QLabel>
 #include "doctor.h"
+#include "patientmanager.h"
+#include "appointmentmanager.h"
 
 namespace Ui
 {
@@ -26,14 +31,33 @@ private slots:
     void setupOverviewPage();
     void setupStatsSection();
 
-    void on_scheduleBtn_clicked();
-
 private:
     Ui::doctorwindow *ui;
     Doctor *doctorBackend;
     QString currentUserName;
     QTimer *timer;
 
+
+    PatientManager     *patientMgr;
+    AppointmentManager *apptMgr;
+
+
+    void setupPatientListPage();
+    void refreshPatientList();
+    void addPatientRow(const Patient &p);
+
+    QVBoxLayout *patientRowsLayout = nullptr;
+    QWidget     *patientRowContainer = nullptr;
+    QLabel      *patientCountLabel = nullptr;
+
+
+    void setupSchedulingPage();
+    void refreshSchedulingTable();
+    void addScheduleRow(const Appointment &a);
+
+    QVBoxLayout *scheduleRowsLayout = nullptr;
+    QWidget     *scheduleRowContainer = nullptr;
+    QLabel      *scheduleCountLabel = nullptr;
 };
 
 #endif // DOCTORWINDOW_H

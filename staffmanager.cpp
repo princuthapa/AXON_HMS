@@ -15,6 +15,10 @@ StaffManager::StaffManager() {
     loadAll();
 }
 
+void StaffManager::reload() {
+    loadAll();
+}
+
 void StaffManager::loadAll() {
     staffList.clear();
 
@@ -130,9 +134,7 @@ int StaffManager::getTotalCount() const {
 
 
 
-// Replace AddStaffDialog / EditStaffDialog classes. Each builds a plain
-// QDialog and returns it; widgets are handed back via reference
-// out-parameters so the caller can read final values after exec().
+
 
 QDialog *createAddStaffDialog(QWidget *parent,
                                QLineEdit *&outUsernameEdit, QLineEdit *&outPasswordEdit,

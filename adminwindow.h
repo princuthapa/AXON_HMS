@@ -12,6 +12,7 @@
 #include "admin.h"
 #include "staffmanager.h"
 #include "patientmanager.h"
+#include "appointmentmanager.h"
 #include <QtCharts/QChartView>
 #include <QtCharts/QChart>
 #include <QTimer>
@@ -48,27 +49,39 @@ private:
     Admin          *adminBackend;
     StaffManager   *staffMgr;
     PatientManager *patientMgr;
+    AppointmentManager *apptMgr;
     QTimer         *timer;
     QString         currentAdminName;
 
-    // ── Overview / patient table helpers ─────────────────────────────────────
+
     void setupPatientHeader();
     void loadPatientRowsFromBackend();
     void addPatientRow(const QString &id,     const QString &name,
                        const QString &gender, const QString &problem,
                        const QString &doctor, const QString &status);
 
-    // ── Staff Manager page ────────────────────────────────────────────────────
+
     void setupStaffPage();
     void refreshStaffTable();
     void addStaffRow(const StaffData &s);
     void updateStaffCountLabel();
 
-    // Staff page widgets (built programmatically inside page_2)
+
     QScrollArea *staffScrollArea   = nullptr;
     QWidget     *staffRowContainer = nullptr;
     QVBoxLayout *staffRowsLayout   = nullptr;
     QLabel      *staffCountLabel   = nullptr;
+
+
+    void setupSchedulingPage();
+    void refreshSchedulingTable();
+    void addSchedulingRow(const Appointment &a);
+
+    QWidget     *schedulingPage       = nullptr;
+    QScrollArea *scheduleScrollArea   = nullptr;
+    QWidget     *scheduleRowContainer = nullptr;
+    QVBoxLayout *scheduleRowsLayout   = nullptr;
+    QLabel      *scheduleCountLabel   = nullptr;
 };
 
 #endif // ADMINWINDOW_H

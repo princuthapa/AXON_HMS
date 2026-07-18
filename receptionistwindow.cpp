@@ -5,25 +5,36 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QLabel>
-#include <QFile>
-#include <QTextStream>
 #include <QMessageBox>
-#include <QDir>
-#include <QFileInfo>
 #include <QMenu>
 #include <QAction>
+#include <QListWidgetItem>
+#include <QDate>
+#include <QDateEdit>
+
 ReceptionistWindow::ReceptionistWindow(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::ReceptionistWindow)
 {
     ui->setupUi(this);
-        this->setWindowTitle("AXON-HMS: Receptionist Dashboard");
+    this->setWindowTitle("AXON-HMS: Receptionist Dashboard");
+
+    // Shared backend managers — these read/write the SAME CSV files that
+    // Admin and Doctor windows use, so every dashboard shows the same data.
+    patientMgr = new PatientManager();
+    staffMgr   = new StaffManager();
+    apptMgr    = new AppointmentManager();
 
     // 1. Connect UI elements to our functions
     setupConnections();
 
-    // 2. Load data onto the screen
+    // 2. Populate doctor dropdowns from the real staff roster
+    populateDoctorDropdowns();
+
+    // 3. Load data onto the screen
     refreshDashboardData();
+    refreshRegisteredPatientsList();
+
     // 1. Create the menu
     QMenu *profileMenu = new QMenu(this);
 
@@ -71,18 +82,16 @@ ReceptionistWindow::ReceptionistWindow(QWidget *parent)
     ui->tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->tableWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
-    // 2. Populate Dropdowns with mock data
-    ui->doctorComboBox->addItems({"Select Doctor", "Dr. A.K. Sharma", "Dr. Sarah Jenkins", "Dr. Michael Chang"});
-    ui->deptComboBox->addItems({"Select Department", "Cardiology", "Neurology", "Pediatrics", "General Medicine"});
-
+    // Time slot dropdown — not backed by staff/patient data, static is fine
     ui->timeSlotComboBox->addItems({"Select Time Slot", "09:00 AM", "09:30 AM", "10:00 AM", "10:30 AM",
                                     "11:00 AM", "11:30 AM", "02:00 PM", "02:30 PM", "03:00 PM"});
 
     // 3. Connect the Book Appointment button to the slot logic
     connect(ui->bookAppointmentBtn, &QPushButton::clicked, this, &ReceptionistWindow::onBookAppointmentClicked);
 
-    // 4. Load any existing records out of your CSV file straight into the table grid
-    loadAppointmentsFromCSV();
+    // 4. Load any existing appointments straight into the schedule table
+    refreshScheduleTable();
+
     dateTimeTimer = new QTimer(this);
     connect(dateTimeTimer, &QTimer::timeout, this, &ReceptionistWindow::updateDateTime);
     dateTimeTimer->start(1000); // Ticks every 1 second
@@ -95,6 +104,9 @@ ReceptionistWindow::ReceptionistWindow(QWidget *parent)
 ReceptionistWindow::~ReceptionistWindow()
 {
     delete ui;
+    delete patientMgr;
+    delete staffMgr;
+    delete apptMgr;
 }
 
 void ReceptionistWindow::setupConnections()
@@ -112,29 +124,39 @@ void ReceptionistWindow::setupConnections()
 
 void ReceptionistWindow::refreshDashboardData()
 {
-    // Triggers the data fetching functions
+
+    patientMgr->reload();
+    apptMgr->reload();
+
     populateAppointmentsTable();
     populateRecentPatientsTable();
 }
 
-// --- Sidebar Actions (Page Navigation) ---
+
 
 void ReceptionistWindow::onDashboardClicked()
 {
     qDebug() << "Switching to Dashboard View (Page Index 0)";
     ui->widgetstackedtogether->setCurrentIndex(0);
+    refreshDashboardData();
 }
 
 void ReceptionistWindow::onRegisterPatientClicked()
 {
     qDebug() << "Switching to Patient Registration Form (Page Index 1)";
     ui->widgetstackedtogether->setCurrentIndex(1);
+    staffMgr->reload();
+    populateDoctorDropdowns();
+    refreshRegisteredPatientsList();
 }
 
 void ReceptionistWindow::onScheduleClicked()
 {
     qDebug() << "Switching to Master Schedule (Page Index 2)";
     ui->widgetstackedtogether->setCurrentIndex(2);
+    staffMgr->reload();
+    populateDoctorDropdowns();
+    refreshScheduleTable();
 }
 
 void ReceptionistWindow::onBillingClicked()
@@ -146,23 +168,89 @@ void ReceptionistWindow::onBillingClicked()
 void ReceptionistWindow::onViewAllAppointmentsClicked()
 {
     qDebug() << "View All Appointments clicked!";
+    apptMgr->reload();
+    refreshScheduleTable();
 }
 
+//Doctor dropdowns, sourced from the real staff roster
 
+void ReceptionistWindow::populateDoctorDropdowns()
+{
+    QStringList doctorNames;
+    for (const auto &s : staffMgr->getAllStaff()) {
+        if (s.role.trimmed().compare("Doctor", Qt::CaseInsensitive) == 0)
+            doctorNames << s.name;
+    }
+
+    // Assign Doctor (Patient Registration page)
+    if (ui->doctorbox) {
+        QString previous = ui->doctorbox->currentText();
+        ui->doctorbox->clear();
+        ui->doctorbox->addItems(doctorNames);
+        int idx = ui->doctorbox->findText(previous);
+        if (idx >= 0) ui->doctorbox->setCurrentIndex(idx);
+    }
+
+    // Book Appointment (Scheduling page)
+    if (ui->doctorComboBox) {
+        QString previous = ui->doctorComboBox->currentText();
+        ui->doctorComboBox->clear();
+        ui->doctorComboBox->addItem("Select Doctor");
+        ui->doctorComboBox->addItems(doctorNames);
+        int idx = ui->doctorComboBox->findText(previous);
+        ui->doctorComboBox->setCurrentIndex(idx >= 0 ? idx : 0);
+    }
+}
+
+//Dashboard stat widgets
 
 void ReceptionistWindow::populateAppointmentsTable()
 {
-    // Left empty for now so it doesn't overwrite your visual UI design.
-    // TODO: Pull live data here from PatientManager later, e.g.:
-    // ui->tableAppointments->setText(patientManager->getAppointmentsText());
+    if (!ui->appointmenttable) return;
+    QVector<Appointment> todays = apptMgr->getTodaysAppointments();
+
+    int rowCount = ui->appointmenttable->rowCount(); // row 0 is used as the visual header
+    for (int r = 1; r < rowCount; ++r) {
+        int dataIdx = r - 1;
+        if (dataIdx < todays.size()) {
+            const Appointment &a = todays.at(dataIdx);
+            ui->appointmenttable->setItem(r, 0, new QTableWidgetItem(a.time));
+            ui->appointmenttable->setItem(r, 1, new QTableWidgetItem(a.patientName));
+            ui->appointmenttable->setItem(r, 2, new QTableWidgetItem(a.doctorName));
+            ui->appointmenttable->setItem(r, 3, new QTableWidgetItem(a.status));
+        } else {
+            for (int c = 0; c < ui->appointmenttable->columnCount(); ++c)
+                ui->appointmenttable->setItem(r, c, new QTableWidgetItem(""));
+        }
+    }
+
+    if (ui->numberofappointment) ui->numberofappointment->setText(QString::number(todays.size()));
 }
 
 void ReceptionistWindow::populateRecentPatientsTable()
 {
-    // Left empty for now so it doesn't overwrite your visual UI design.
-    // TODO: Pull live data here from PatientManager later, e.g.:
-    // ui->tableRecentPatients->setText(patientManager->getRecentPatientsText());
+    if (!ui->registeredpatienttable) return;
+    QVector<Patient> patients = patientMgr->getAllPatients();
+
+    int rowCount = ui->registeredpatienttable->rowCount(); // row 0 is the visual header
+    for (int r = 1; r < rowCount; ++r) {
+        int dataIdx = patients.size() - r; // most recently added first
+        if (dataIdx >= 0) {
+            const Patient &p = patients.at(dataIdx);
+            ui->registeredpatienttable->setItem(r, 0, new QTableWidgetItem(p.id));
+            ui->registeredpatienttable->setItem(r, 1, new QTableWidgetItem(p.name));
+            ui->registeredpatienttable->setItem(r, 2, new QTableWidgetItem(p.age));
+            ui->registeredpatienttable->setItem(r, 3, new QTableWidgetItem(p.gender));
+            ui->registeredpatienttable->setItem(r, 4, new QTableWidgetItem(p.status));
+        } else {
+            for (int c = 0; c < ui->registeredpatienttable->columnCount(); ++c)
+                ui->registeredpatienttable->setItem(r, c, new QTableWidgetItem(""));
+        }
+    }
+
+    if (ui->numberofpatient) ui->numberofpatient->setText(QString::number(patients.size()));
 }
+
 void ReceptionistWindow::onClearFormClicked()
 {
     ui->namebox->clear();
@@ -175,67 +263,70 @@ void ReceptionistWindow::onClearFormClicked()
     ui->doctorbox->setCurrentIndex(0);
     ui->departmentbox->setCurrentIndex(0);
 }
+
 void ReceptionistWindow::onSubmitRegistrationClicked()
 {
     // 1. GRAB ALL DATA FROM THE FORM
-    QString name = ui->namebox->text();
-    QString age = QString::number(ui->agebar->value());
-    QString gender = ui->genderbox->currentText();
-    QString phone = ui->phonebox->text();
-    QString address = ui->addressbox->text();
-    QString doctor = ui->doctorbox->currentText();
-    QString dept = ui->departmentbox->currentText();
+    QString name    = ui->namebox->text().trimmed();
+    QString age     = QString::number(ui->agebar->value());
+    QString gender  = ui->genderbox->currentText();
+    QString phone   = ui->phonebox->text().trimmed();
+    QString address = ui->addressbox->text().trimmed();
+    QString doctor  = ui->doctorbox->currentText();
+    QString dept    = ui->departmentbox->currentText();
 
     if (name.isEmpty()) return; // Don't register empty names
 
-    // Generate a dummy Patient ID
-    int nextId = 1280 + ui->listRecentPatientsReg->count();
-    QString patientID = "P-" + QString::number(nextId);
-
-    // 2. CLEAN AND SAVE TO CSV DATABASE
+    // Sanitize commas so the CSV stays well-formed
     name.replace(",", " ");
     address.replace(",", " ");
 
-    QFile file("patients_database.csv");
-    bool isNewFile = !file.exists();
+    // 2. SAVE THROUGH THE SHARED PatientManager — this is the SAME patient_database.csv that Admin and Doctor windows read from.
+    Patient newPatient;
+    newPatient.id                 = patientMgr->generateNextId();
+    newPatient.name               = name;
+    newPatient.age                = age;
+    newPatient.gender             = gender;
+    newPatient.diagnosisTreatment = "Awaiting Consultation (" + dept + ")";
+    newPatient.assignedDoctor     = doctor;
+    newPatient.status             = "Checked In";
+    newPatient.bedNumber          = "";
 
-    if (file.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text)) {
-        QTextStream out(&file);
+    patientMgr->addPatient(newPatient);
 
-        if (isNewFile) {
-            out << "PatientID,Name,Age,Gender,Phone,Address,AssignedDoctor,Department\n";
-        }
+    // 3. ADD DIRECTLY TO THE LIVE LIST WIDGET
+    addPatientListItem(newPatient);
 
-        out << patientID << "," << name << "," << age << "," << gender << ","
-            << phone << "," << address << "," << doctor << "," << dept << "\n";
+    // 4. Keep dashboard stat cards in sync
+    populateRecentPatientsTable();
 
-        file.close(); // File is saved silently here!
-    } else {
-        // We keep the error message just in case the file gets locked by Excel
-        QMessageBox::critical(this, "Database Error", "Could not save patient to CSV file!");
-        return;
+    // 5. CLEAR FORM
+    onClearFormClicked();
+}
+
+void ReceptionistWindow::refreshRegisteredPatientsList()
+{
+    ui->listRecentPatientsReg->clear();
+    QVector<Patient> patients = patientMgr->getAllPatients();
+    // Show the most recently registered patients first, most-recent last N is fine too;
+    // here we simply list everyone so the receptionist can see the full live roster.
+    for (const auto &p : patients) {
+        addPatientListItem(p);
     }
+}
 
-    // 3. BUILD THE CUSTOM LIST WIDGET UI (The Circle Avatar & Badges)
-    QString initials = "";
-    QStringList nameParts = name.split(" ", Qt::SkipEmptyParts);
-    if (nameParts.size() > 0) initials += nameParts[0].left(1).toUpper();
-    if (nameParts.size() > 1) initials += nameParts[1].left(1).toUpper();
-
+void ReceptionistWindow::addPatientListItem(const Patient &p)
+{
     QWidget *customItem = new QWidget();
     QHBoxLayout *mainLayout = new QHBoxLayout(customItem);
     mainLayout->setContentsMargins(5, 5, 5, 5);
 
-    QLabel *avatar = new QLabel(initials);
-    avatar->setFixedSize(36, 36);
-    avatar->setAlignment(Qt::AlignCenter);
-    avatar->setStyleSheet("background-color: #2b4c7e; color: white; border-radius: 18px; font-weight: bold; font-size: 14px;");
 
     QVBoxLayout *middleLayout = new QVBoxLayout();
-    QLabel *nameLabel = new QLabel(name);
-    nameLabel->setStyleSheet("font-weight: bold; font-size: 14px; color: #e0e0e0;");
+    QLabel *nameLabel = new QLabel(p.name);
+    nameLabel->setStyleSheet("font-weight: bold; font-size: 14px; color: #000000;");
 
-    QLabel *detailsLabel = new QLabel("Age " + age + " • " + gender + " • " + dept);
+    QLabel *detailsLabel = new QLabel("Age " + p.age + " • " + p.gender + " • Dr. " + p.assignedDoctor);
     detailsLabel->setStyleSheet("color: #aaaaaa; font-size: 11px;");
 
     middleLayout->addWidget(nameLabel);
@@ -243,34 +334,30 @@ void ReceptionistWindow::onSubmitRegistrationClicked()
     middleLayout->setAlignment(Qt::AlignVCenter);
 
     QVBoxLayout *rightLayout = new QVBoxLayout();
-    QLabel *idLabel = new QLabel(patientID);
+    QLabel *idLabel = new QLabel(p.id);
     idLabel->setStyleSheet("color: #aaaaaa; font-size: 11px;");
     idLabel->setAlignment(Qt::AlignRight);
 
-    QLabel *statusBadge = new QLabel("Checked in");
-    statusBadge->setStyleSheet("background-color: rgba(76, 175, 80, 0.2); color: #4caf50; border-radius: 10px; padding: 2px 8px; font-size: 11px;");
+    QLabel *statusBadge = new QLabel(p.status);
+    statusBadge->setStyleSheet(" color: #4caf50; border-radius: 10px; padding: 2px 8px; font-size: 11px;");
     statusBadge->setAlignment(Qt::AlignCenter);
 
     rightLayout->addWidget(idLabel);
     rightLayout->addWidget(statusBadge);
     rightLayout->setAlignment(Qt::AlignVCenter | Qt::AlignRight);
 
-    mainLayout->addWidget(avatar);
-    mainLayout->addSpacing(10);
+
     mainLayout->addLayout(middleLayout);
     mainLayout->addStretch();
     mainLayout->addLayout(rightLayout);
     customItem->setLayout(mainLayout);
 
-    // 4. ADD TO THE REGISTRATION LIST
     QListWidgetItem *listItem = new QListWidgetItem(ui->listRecentPatientsReg);
     listItem->setSizeHint(QSize(0, 60));
     ui->listRecentPatientsReg->addItem(listItem);
     ui->listRecentPatientsReg->setItemWidget(listItem, customItem);
-
-    // 5. CLEAR FORM
-    onClearFormClicked();
 }
+
 void ReceptionistWindow::updateDateTime() {
     QDateTime current = QDateTime::currentDateTime();
 
@@ -279,14 +366,17 @@ void ReceptionistWindow::updateDateTime() {
 
     ui->dateLabel->setText(dateText);
 }
+
 void ReceptionistWindow::onBookAppointmentClicked() {
     // 1. Extract values from UI items
     QString patient = ui->patientNameLineEdit->text().trimmed();
-    QString doctor = ui->doctorComboBox->currentText();
-    QString time = ui->timeSlotComboBox->currentText();
-    QString dept = ui->deptComboBox->currentText();
-    QString reason = ui->reasonTextEdit->toPlainText().trimmed();
-    QString status = "Confirmed"; // Default booking status
+    QString doctor  = ui->doctorComboBox->currentText();
+    QString time    = ui->timeSlotComboBox->currentText();
+    QString dept    = ui->deptComboBox->currentText();
+    QString reason  = ui->reasonTextEdit->toPlainText().trimmed();
+    QString date    = ui->Datee ? ui->Datee->date().toString("yyyy-MM-dd")
+                                 : QDate::currentDate().toString("yyyy-MM-dd");
+    QString status  = "Confirmed"; // Default booking status
 
     // 2. Simple validation guard rails
     if (patient.isEmpty() || doctor == "Select Doctor" || time == "Select Time Slot" || reason.isEmpty()) {
@@ -294,32 +384,25 @@ void ReceptionistWindow::onBookAppointmentClicked() {
         return;
     }
 
-    // 3. SAVE TO CSV DATABASE FILE
-    QFile file("appointments.csv");
-    // Open in Append mode so we add rows without erasing existing histories
-    if (file.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text)) {
-        QTextStream out(&file);
-        // Standard CSV format escaping values: Patient, Doctor, Time, Status, Department, Reason
-        out << "\"" << patient << "\",\""
-            << doctor << "\",\""
-            << time << "\",\""
-            << status << "\",\""
-            << dept << "\",\""
-            << reason << "\"\n";
-        file.close();
-    } else {
-        QMessageBox::critical(this, "Database Error", "Could not open data storage file for writing!");
-        return;
-    }
+    // Sanitize commas so the CSV stays well-formed
+    patient.replace(",", " ");
+    reason.replace(",", " ");
 
-    // 4. ADD DIRECTLY TO THE LIVE TABLE VIEW
-    int rowCount = ui->tableWidget->rowCount();
-    ui->tableWidget->insertRow(rowCount);
+    // 3. SAVE THROUGH THE SHARED AppointmentManager — same
+    //    appointment_database.csv that Admin and Doctor windows read from.
+    Appointment a;
+    a.id          = apptMgr->generateNextId();
+    a.patientName = patient;
+    a.doctorName  = doctor;
+    a.department  = dept;
+    a.date        = date;
+    a.time        = time;
+    a.reason      = reason;
+    a.status      = status;
+    apptMgr->addAppointment(a);
 
-    ui->tableWidget->setItem(rowCount, 0, new QTableWidgetItem(patient));
-    ui->tableWidget->setItem(rowCount, 1, new QTableWidgetItem(doctor));
-    ui->tableWidget->setItem(rowCount, 2, new QTableWidgetItem(time));
-    ui->tableWidget->setItem(rowCount, 3, new QTableWidgetItem(status));
+    // 4. REFRESH THE LIVE TABLE VIEW FROM THE BACKEND
+    refreshScheduleTable();
 
     // 5. Clear fields for next entry
     ui->patientNameLineEdit->clear();
@@ -331,36 +414,15 @@ void ReceptionistWindow::onBookAppointmentClicked() {
     QMessageBox::information(this, "Success", "Appointment registered successfully!");
 }
 
-void ReceptionistWindow::loadAppointmentsFromCSV() {
-    // Clear out any test design headers/rows built into the UI grid beforehand
+void ReceptionistWindow::refreshScheduleTable() {
     ui->tableWidget->setRowCount(0);
 
-    QFile file("appointments.csv");
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        // File doesn't exist yet, which is completely fine for the first launch
-        return;
+    for (const auto &a : apptMgr->getAllAppointments()) {
+        int rowCount = ui->tableWidget->rowCount();
+        ui->tableWidget->insertRow(rowCount);
+        ui->tableWidget->setItem(rowCount, 0, new QTableWidgetItem(a.patientName));
+        ui->tableWidget->setItem(rowCount, 1, new QTableWidgetItem(a.doctorName));
+        ui->tableWidget->setItem(rowCount, 2, new QTableWidgetItem(a.time));
+        ui->tableWidget->setItem(rowCount, 3, new QTableWidgetItem(a.status));
     }
-
-    QTextStream in(&file);
-    while (!in.atEnd()) {
-        QString line = in.readLine();
-        // Split row parsing logic safely splitting standard text lines by commas
-        // Note: Simple split by comma. Remove extra quote notations saved into string rows
-        QStringList rowData = line.split(",");
-        if (rowData.size() >= 4) {
-            int rowCount = ui->tableWidget->rowCount();
-            ui->tableWidget->insertRow(rowCount);
-
-            QString pName = rowData[0].remove("\"");
-            QString dName = rowData[1].remove("\"");
-            QString tSlot = rowData[2].remove("\"");
-            QString stat = rowData[3].remove("\"");
-
-            ui->tableWidget->setItem(rowCount, 0, new QTableWidgetItem(pName));
-            ui->tableWidget->setItem(rowCount, 1, new QTableWidgetItem(dName));
-            ui->tableWidget->setItem(rowCount, 2, new QTableWidgetItem(tSlot));
-            ui->tableWidget->setItem(rowCount, 3, new QTableWidgetItem(stat));
-        }
-    }
-    file.close();
 }

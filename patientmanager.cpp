@@ -13,6 +13,10 @@ PatientManager::PatientManager() {
     loadAll();
 }
 
+void PatientManager::reload() {
+    loadAll();
+}
+
 // Loads all patient records from the CSV database into memory
 void PatientManager::loadAll() {
     patientList.clear();
@@ -28,7 +32,7 @@ void PatientManager::loadAll() {
         QTextStream in(&res);
         _parseStream(in);
         res.close();
-        saveAll(); // write out to working directory so future edits persist
+        saveAll();
         return;
     }
 
@@ -163,11 +167,24 @@ int PatientManager::getTotalCount() const {
     return patientList.size();
 }
 
+// Generates the next sequential, collision-free Patient ID (PT-0001, PT-0002, ...)
+QString PatientManager::generateNextId() const {
+    int n = patientList.size() + 1;
+    QString candidate;
+    bool exists;
+    do {
+        candidate = QString("PT-%1").arg(n, 4, 10, QChar('0'));
+        exists = false;
+        for (const auto &p : patientList) {
+            if (p.id == candidate) { exists = true; break; }
+        }
+        ++n;
+    } while (exists);
+    return candidate;
+}
 
-// ── Dialog factory function ─────────────────────────────────────────────
-// Replaces the old EditPatientDialog class. Builds the same UI on a plain
-// QDialog and returns it; the editable widgets are handed back through the
-// reference out-parameters so the caller can read final values after exec().
+
+
 QDialog *createEditPatientDialog(const QString &id, const QString &name, const QString &gender,
                                   const QString &problem, const QString &doctor, const QString &status,
                                   QWidget *parent,

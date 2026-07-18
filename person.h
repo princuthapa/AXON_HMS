@@ -3,8 +3,7 @@
 
 #include <QString>
 
-// Base class for everyone who can log into AXON-HMS (Admin, Doctor, Receptionist)
-// Holds the shared identity fields so each role doesn't redeclare id/name/age/gender/phone on its own.
+
 class Person
 {
 public:

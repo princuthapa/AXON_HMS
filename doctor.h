@@ -4,8 +4,7 @@
 #include "person.h"
 #include "patientmanager.h"
 
-// Doctor "isa" Person, and "uses" PatientManager (dependency arrow on
-// the diagram) to look up and update patient records.
+
 class Doctor : public Person
 {
 public:
@@ -14,7 +13,7 @@ public:
            const QString &gender, const QString &phone);
     ~Doctor();
 
-    // The core execution method that drives the main interface menu loop
+
     void runMainInterface();
 
 
@@ -24,7 +23,7 @@ public:
     void viewAppointments();
 
 private:
-    // Dependency link to the manager class
+
     PatientManager *patientMgr;
 };
 
