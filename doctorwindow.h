@@ -28,8 +28,17 @@ private slots:
     void updateDateTime();
     void switchPage();
     void logout();
-    void setupOverviewPage();
+
+    // NEW: Overview layout setup (replaces setupOverviewPage)
+    void setupOverviewLayout();
     void setupStatsSection();
+
+    // NEW: Populate functions for overview page
+    void populatePatientList();
+    void populateAppointmentsTable();
+
+    // NEW: View patient details
+    void viewPatientDetails(const QString &patientId);
 
 private:
     Ui::doctorwindow *ui;
@@ -37,11 +46,10 @@ private:
     QString currentUserName;
     QTimer *timer;
 
-
     PatientManager     *patientMgr;
     AppointmentManager *apptMgr;
 
-
+    // Patient List page
     void setupPatientListPage();
     void refreshPatientList();
     void addPatientRow(const Patient &p);
@@ -50,7 +58,7 @@ private:
     QWidget     *patientRowContainer = nullptr;
     QLabel      *patientCountLabel = nullptr;
 
-
+    // Scheduling page
     void setupSchedulingPage();
     void refreshSchedulingTable();
     void addScheduleRow(const Appointment &a);
