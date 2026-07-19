@@ -10,6 +10,7 @@
 #include "patientmanager.h"
 #include "staffmanager.h"
 #include "appointmentmanager.h"
+#include "billingmanager.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class ReceptionistWindow; }
@@ -35,16 +36,23 @@ private slots:
     void onClearFormClicked();
     void onSubmitRegistrationClicked();
     void updateDateTime();
-    void onBookAppointmentClicked();
+    void onBookAppointmentClicked(); // Handles click event
+
+    // Billing page
+    void onBillingSearchClicked();
+    void onGenerateBillClicked();
+    void onProcessPaymentClicked();
+
 private:
     Ui::ReceptionistWindow *ui;
 
-
+    // Shared backend — same CSV files Admin & Doctor windows use
     PatientManager     *patientMgr;
     StaffManager       *staffMgr;
     AppointmentManager *apptMgr;
+    BillingManager      *billingMgr;
 
-
+    // Helper functions to keep code clean
     void setupConnections();
     void refreshDashboardData();
     void populateAppointmentsTable();
@@ -54,6 +62,16 @@ private:
     void refreshScheduleTable();        // fills the Scheduling page's tableWidget from AppointmentManager
     void refreshRegisteredPatientsList();// fills listRecentPatientsReg from PatientManager
     void addPatientListItem(const Patient &p); // builds one custom list row widget
+
+    // Billing page helpers
+    QString currentBillingPatientId;   // patient currently loaded on the Billing page
+    QString currentBillId;             // bill currently displayed in Current Bill Summary (may be empty)
+
+    void populateBillingPatientCard(const Patient &p);
+    void clearBillingPatientCard();
+    void populateBillSummaryTable(const BillingRecord &bill);
+    void clearBillSummaryTable();
+    QString selectedPaymentMode() const; // reads the checked Payment Mode radio button
 
     QTimer *dateTimeTimer;
 };

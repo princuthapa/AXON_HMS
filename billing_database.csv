@@ -1,0 +1,3 @@
+# bill_id,patient_id,date,subtotal,deposit_paid,discount,amount_to_pay,remaining_balance,payment_mode,serialized_items,notes
+B-0001,PT-0001,2026-07-19,150.00,100.00,0.00,50.00,700.00,Cash,semi-private room:Semi-private room:100.00|nursing care:Nursing care:50.00,First installment paid.
+B-0002,PT-0001,2026-07-19,420.00,0.00,20.00,400.00,0.00,Card,lab:Blood panel:120.00|pharmacy:Antibiotics:300.00,Paid in full.
