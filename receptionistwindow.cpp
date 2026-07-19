@@ -14,6 +14,81 @@
 #include <QRadioButton>
 #include <QFont>
 #include <QTableWidgetItem>
+#include <QStyledItemDelegate>
+#include <QKeyEvent>
+
+
+namespace {
+
+class AmountColumnDelegate : public QStyledItemDelegate
+{
+public:
+    explicit AmountColumnDelegate(QTableWidget *table, QObject *parent = nullptr)
+        : QStyledItemDelegate(parent), m_table(table) {}
+
+protected:
+    QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option,
+                          const QModelIndex &index) const override
+    {
+        m_editingIndex = index;
+        return QStyledItemDelegate::createEditor(parent, option, index);
+    }
+
+    bool eventFilter(QObject *editor, QEvent *event) override
+    {
+        if (event->type() == QEvent::KeyPress) {
+            auto *keyEvent = static_cast<QKeyEvent *>(event);
+            const int key = keyEvent->key();
+
+            if (key == Qt::Key_Down || key == Qt::Key_Up ||
+                key == Qt::Key_Return || key == Qt::Key_Enter) {
+
+                QWidget *editorWidget = qobject_cast<QWidget *>(editor);
+                if (editorWidget) {
+                    emit commitData(editorWidget);
+                    emit closeEditor(editorWidget, QAbstractItemDelegate::NoHint);
+                }
+
+                if (m_table && m_editingIndex.isValid()) {
+                    const int row = m_editingIndex.row();
+                    const int col = m_editingIndex.column();
+                    const int newRow = (key == Qt::Key_Up) ? row - 1 : row + 1;
+
+                    if (newRow >= 0 && newRow < m_table->rowCount()) {
+                        m_table->setCurrentCell(newRow, col);
+                        if (m_table->model())
+                            m_table->edit(m_table->model()->index(newRow, col));
+                    }
+                }
+                return true;
+            }
+        }
+        return QStyledItemDelegate::eventFilter(editor, event);
+    }
+
+private:
+    QTableWidget *m_table;
+    mutable QModelIndex m_editingIndex;
+};
+
+//Standard fee-schedule template
+// The four service rows that always appear in "Current Bill Summary" —
+// Service and Description are fixed; only the Amount cell is editable.
+struct ServiceTemplateRow { QString code; QString description; };
+
+const QVector<ServiceTemplateRow> kServiceTemplate = {
+    {"Service Charge",      "Service Fees"},
+    {"Nursing Care",      "Routine nursing care"},
+    {"Lab",                "Laboratory / diagnostic services"},
+    {"Pharmacy",           "Pharmacy / medication charges"},
+    };
+
+const int kServiceRowCount = static_cast<int>(kServiceTemplate.size());
+const int kRowSubtotal     = kServiceRowCount;      // row 4
+const int kRowDeposit      = kServiceRowCount + 1;  // row 5
+const int kRowRemaining    = kServiceRowCount + 2;  // row 6
+
+} // namespace
 
 ReceptionistWindow::ReceptionistWindow(QWidget *parent)
     : QWidget(parent)
@@ -39,7 +114,15 @@ ReceptionistWindow::ReceptionistWindow(QWidget *parent)
     refreshDashboardData();
     refreshRegisteredPatientsList();
     clearBillingPatientCard();
-    clearBillSummaryTable();
+
+    // 4. Billing table: keyboard navigation + live totals + pre-filled rows
+    ui->billingSummaryTable->setItemDelegateForColumn(
+        2, new AmountColumnDelegate(ui->billingSummaryTable, this));
+    connect(ui->billingSummaryTable, &QTableWidget::itemChanged,
+            this, &ReceptionistWindow::recomputeBillTotals);
+    connect(ui->billingDiscountEdit, &QLineEdit::textChanged,
+            this, [this](const QString &) { recomputeBillTotals(); });
+    populateBillingServiceTemplate();
 
     // 1. Create the menu
     QMenu *profileMenu = new QMenu(this);
@@ -178,6 +261,16 @@ void ReceptionistWindow::onBillingClicked()
     ui->widgetstackedtogether->setCurrentIndex(3);
     patientMgr->reload();
     billingMgr->reload();
+
+    // Fresh slate each time the receptionist opens the Billing tab — table
+    // is already filled with the standard service rows, amounts at 0.00.
+    currentBillingPatientId.clear();
+    currentBillId.clear();
+    clearBillingPatientCard();
+    ui->billingSearchEdit->clear();
+    ui->billingDiscountEdit->clear();
+    ui->billingNotesEdit->clear();
+    populateBillingServiceTemplate();
 }
 
 void ReceptionistWindow::onViewAllAppointmentsClicked()
@@ -333,7 +426,7 @@ void ReceptionistWindow::refreshRegisteredPatientsList()
 
 void ReceptionistWindow::addPatientListItem(const Patient &p)
 {
-    // 3. BUILD THE CUSTOM LIST WIDGET UI (The Circle Avatar & Badges)
+
     QString initials = "";
     QStringList nameParts = p.name.split(" ", Qt::SkipEmptyParts);
     if (nameParts.size() > 0) initials += nameParts[0].left(1).toUpper();
@@ -342,6 +435,7 @@ void ReceptionistWindow::addPatientListItem(const Patient &p)
     QWidget *customItem = new QWidget();
     QHBoxLayout *mainLayout = new QHBoxLayout(customItem);
     mainLayout->setContentsMargins(5, 5, 5, 5);
+
 
 
     QVBoxLayout *middleLayout = new QVBoxLayout();
@@ -368,8 +462,7 @@ void ReceptionistWindow::addPatientListItem(const Patient &p)
     rightLayout->addWidget(statusBadge);
     rightLayout->setAlignment(Qt::AlignVCenter | Qt::AlignRight);
 
-    // mainLayout->addWidget(avatar);
-    // mainLayout->addSpacing(10);
+
     mainLayout->addLayout(middleLayout);
     mainLayout->addStretch();
     mainLayout->addLayout(rightLayout);
@@ -467,6 +560,7 @@ void ReceptionistWindow::populateBillingPatientCard(const Patient &p)
     if (parts.size() > 0) initials += parts[0].left(1).toUpper();
     if (parts.size() > 1) initials += parts[1].left(1).toUpper();
 
+
     ui->billingPatientIdLabel->setText("Patient ID: " + p.id);
     ui->billingPatientNameLabel->setText("Name: " + p.name);
     ui->billingPatientAgeLabel->setText("Age: " + p.age);
@@ -475,47 +569,151 @@ void ReceptionistWindow::populateBillingPatientCard(const Patient &p)
 
 void ReceptionistWindow::clearBillingPatientCard()
 {
+
     ui->billingPatientIdLabel->setText("Patient ID: —");
     ui->billingPatientNameLabel->setText("Name: —");
     ui->billingPatientAgeLabel->setText("Age: —");
     ui->billingPatientGenderLabel->setText("Gender: —");
 }
 
-void ReceptionistWindow::clearBillSummaryTable()
+// Resets "Current Bill Summary" to the standard fee-schedule rows: Service
+// and Description are pre-filled and locked; only the Amount cell (column 2)
+// is editable. Subtotal / Deposit / Remaining Balance rows are appended
+// below — Subtotal and Remaining Balance are computed and locked, Deposit
+// stays editable so the receptionist can record an upfront deposit inline.
+void ReceptionistWindow::populateBillingServiceTemplate()
 {
-    ui->billingSummaryTable->setRowCount(0);
-}
+    QTableWidget *t = ui->billingSummaryTable;
+    t->blockSignals(true);
+    t->setRowCount(0);
 
-void ReceptionistWindow::populateBillSummaryTable(const BillingRecord &bill)
-{
-    ui->billingSummaryTable->setRowCount(0);
+    auto addServiceRow = [&](const QString &code, const QString &desc) {
+        int row = t->rowCount();
+        t->insertRow(row);
 
-    auto addRow = [&](const QString &c0, const QString &c1, const QString &c2, bool bold) {
-        int row = ui->billingSummaryTable->rowCount();
-        ui->billingSummaryTable->insertRow(row);
-        QTableWidgetItem *i0 = new QTableWidgetItem(c0);
-        QTableWidgetItem *i1 = new QTableWidgetItem(c1);
-        QTableWidgetItem *i2 = new QTableWidgetItem(c2);
-        if (bold) {
-            QFont f = i0->font(); f.setBold(true);
-            i0->setFont(f); i1->setFont(f); i2->setFont(f);
-        }
-        ui->billingSummaryTable->setItem(row, 0, i0);
-        ui->billingSummaryTable->setItem(row, 1, i1);
-        ui->billingSummaryTable->setItem(row, 2, i2);
+        QTableWidgetItem *serviceItem = new QTableWidgetItem(code);
+        serviceItem->setFlags(serviceItem->flags() & ~Qt::ItemIsEditable);
+        QTableWidgetItem *descItem = new QTableWidgetItem(desc);
+        descItem->setFlags(descItem->flags() & ~Qt::ItemIsEditable);
+        QTableWidgetItem *amountItem = new QTableWidgetItem("0.00");
+        amountItem->setFlags(amountItem->flags() | Qt::ItemIsEditable);
+        amountItem->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
+
+        t->setItem(row, 0, serviceItem);
+        t->setItem(row, 1, descItem);
+        t->setItem(row, 2, amountItem);
     };
 
-    for (const auto &it : bill.items)
-        addRow(it.serviceCode, it.description, QString::number(it.amount, 'f', 2), false);
+    for (const auto &s : kServiceTemplate)
+        addServiceRow(s.code, s.description);
 
-    addRow("Subtotal", "", QString::number(bill.subtotal, 'f', 2), true);
-    if (bill.depositPaid > 0.0)
-        addRow("Deposit Paid", "", QString::number(bill.depositPaid, 'f', 2), false);
-    if (bill.discount > 0.0)
-        addRow("Discount", "", QString::number(bill.discount, 'f', 2), false);
-    if (bill.amountToPay > 0.0)
-        addRow("Amount Paid", bill.paymentMode, QString::number(bill.amountToPay, 'f', 2), false);
-    addRow("Remaining Balance", "", QString::number(bill.remainingBalance, 'f', 2), true);
+    auto addSummaryRow = [&](const QString &label, bool amountEditable) {
+        int row = t->rowCount();
+        t->insertRow(row);
+
+        QTableWidgetItem *labelItem = new QTableWidgetItem(label);
+        labelItem->setFlags(labelItem->flags() & ~Qt::ItemIsEditable);
+        QFont boldFont = labelItem->font();
+        boldFont.setBold(true);
+        labelItem->setFont(boldFont);
+
+        QTableWidgetItem *blankItem = new QTableWidgetItem("");
+        blankItem->setFlags(blankItem->flags() & ~Qt::ItemIsEditable);
+
+        QTableWidgetItem *amountItem = new QTableWidgetItem("0.00");
+        amountItem->setTextAlignment(Qt::AlignRight | Qt::AlignVCenter);
+        if (amountEditable) {
+            amountItem->setFlags(amountItem->flags() | Qt::ItemIsEditable);
+        } else {
+            amountItem->setFlags(amountItem->flags() & ~Qt::ItemIsEditable);
+            amountItem->setFont(boldFont);
+        }
+
+        t->setItem(row, 0, labelItem);
+        t->setItem(row, 1, blankItem);
+        t->setItem(row, 2, amountItem);
+    };
+
+    addSummaryRow("Subtotal", false);
+    addSummaryRow("Deposit", true);
+    addSummaryRow("Remaining Balance", false);
+
+    t->blockSignals(false);
+}
+
+// Fills a previously-generated bill's amounts into the template built by
+// populateBillingServiceTemplate(). Matches items back to template rows by
+// service code; any legacy item that doesn't match a known service is
+// simply skipped (this app's earlier billing flow used a single generic
+// "Service Charge" line, which predates this fixed fee-schedule table).
+void ReceptionistWindow::loadBillIntoTable(const BillingRecord &bill)
+{
+    populateBillingServiceTemplate();
+
+    QTableWidget *t = ui->billingSummaryTable;
+    t->blockSignals(true);
+
+    for (const auto &item : bill.items) {
+        for (int r = 0; r < kServiceRowCount; ++r) {
+            if (kServiceTemplate[r].code.compare(item.serviceCode, Qt::CaseInsensitive) == 0) {
+                t->item(r, 2)->setText(QString::number(item.amount, 'f', 2));
+                break;
+            }
+        }
+    }
+    t->item(kRowDeposit, 2)->setText(QString::number(bill.depositPaid, 'f', 2));
+
+    t->blockSignals(false);
+
+    ui->billingDiscountEdit->blockSignals(true);
+    ui->billingDiscountEdit->setText(QString::number(bill.discount, 'f', 2));
+    ui->billingDiscountEdit->blockSignals(false);
+
+    // Show the bill's actual stored Subtotal / Remaining Balance (which may
+    // already reflect prior payments processed against it) rather than a
+    // freshly recomputed value.
+    t->blockSignals(true);
+    t->item(kRowSubtotal, 2)->setText(QString::number(bill.subtotal, 'f', 2));
+    t->item(kRowRemaining, 2)->setText(QString::number(bill.remainingBalance, 'f', 2));
+    t->blockSignals(false);
+}
+
+// Re-sums Subtotal (service rows) and Remaining Balance (Subtotal - Deposit
+// - Discount, floored at 0) whenever an editable Amount cell or the Discount
+// field changes. Guarded against re-entrancy since this method itself edits
+// table cells, which would otherwise re-trigger itemChanged.
+void ReceptionistWindow::recomputeBillTotals()
+{
+    if (m_updatingBillTable) return;
+
+    QTableWidget *t = ui->billingSummaryTable;
+    if (t->rowCount() < kServiceRowCount + 3) return; // template not built yet
+
+    m_updatingBillTable = true;
+    t->blockSignals(true);
+
+    double subtotal = 0.0;
+    for (int r = 0; r < kServiceRowCount; ++r) {
+        if (QTableWidgetItem *it = t->item(r, 2))
+            subtotal += it->text().trimmed().toDouble();
+    }
+
+    double deposit = 0.0;
+    if (QTableWidgetItem *dep = t->item(kRowDeposit, 2))
+        deposit = dep->text().trimmed().toDouble();
+
+    double discount = ui->billingDiscountEdit->text().trimmed().toDouble();
+
+    double remaining = subtotal - deposit - discount;
+    if (remaining < 0.0) remaining = 0.0;
+
+    if (QTableWidgetItem *sub = t->item(kRowSubtotal, 2))
+        sub->setText(QString::number(subtotal, 'f', 2));
+    if (QTableWidgetItem *rem = t->item(kRowRemaining, 2))
+        rem->setText(QString::number(remaining, 'f', 2));
+
+    t->blockSignals(false);
+    m_updatingBillTable = false;
 }
 
 void ReceptionistWindow::onBillingSearchClicked()
@@ -548,7 +746,7 @@ void ReceptionistWindow::onBillingSearchClicked()
     if (!matched) {
         QMessageBox::warning(this, "Not Found", "No patient matches \"" + query + "\".");
         clearBillingPatientCard();
-        clearBillSummaryTable();
+        populateBillingServiceTemplate();
         currentBillingPatientId.clear();
         currentBillId.clear();
         return;
@@ -559,11 +757,13 @@ void ReceptionistWindow::onBillingSearchClicked()
 
     BillingRecord latest = billingMgr->getLatestBillForPatient(found.id);
     if (latest.billId.isEmpty()) {
+        // No bill on file yet — start from a clean, pre-filled template.
         currentBillId.clear();
-        clearBillSummaryTable();
+        ui->billingDiscountEdit->clear();
+        populateBillingServiceTemplate();
     } else {
         currentBillId = latest.billId;
-        populateBillSummaryTable(latest);
+        loadBillIntoTable(latest);
     }
 }
 
@@ -574,39 +774,49 @@ void ReceptionistWindow::onGenerateBillClicked()
         return;
     }
 
-    bool okAmount = false;
-    double chargeAmount = ui->billingAmountToPayEdit->text().trimmed().toDouble(&okAmount);
-    if (!okAmount || chargeAmount <= 0.0) {
-        QMessageBox::warning(this, "Invalid Amount", "Enter a valid charge amount in \"Amount to Pay\" before generating a bill.");
+    QTableWidget *t = ui->billingSummaryTable;
+
+    QVector<BillItem> items;
+    for (int r = 0; r < kServiceRowCount; ++r) {
+        QTableWidgetItem *it = t->item(r, 2);
+        double amount = it ? it->text().trimmed().toDouble() : 0.0;
+        if (amount > 0.0) {
+            BillItem bi;
+            bi.serviceCode = kServiceTemplate[r].code;
+            bi.description = kServiceTemplate[r].description;
+            bi.amount      = amount;
+            items.append(bi);
+        }
+    }
+
+    if (items.isEmpty()) {
+        QMessageBox::warning(this, "No Charges Entered",
+                             "Enter an amount for at least one service in the Current Bill Summary table before generating a bill.");
         return;
     }
+
+    double deposit = 0.0;
+    if (QTableWidgetItem *dep = t->item(kRowDeposit, 2))
+        deposit = dep->text().trimmed().toDouble();
 
     double discount = ui->billingDiscountEdit->text().trimmed().toDouble();
     QString notes = ui->billingNotesEdit->text().trimmed();
 
-    Patient p = patientMgr->searchPatient(currentBillingPatientId);
-    QString description = p.diagnosisTreatment.trimmed().isEmpty()
-                              ? "General Service"
-                              : p.diagnosisTreatment;
-
-    QVector<BillItem> items;
-    BillItem item;
-    item.serviceCode  = "Service Charge";
-    item.description  = description;
-    item.amount       = chargeAmount;
-    items.append(item);
-
-    QString newBillId = billingMgr->generateBill(currentBillingPatientId, items,
-                                                 /*depositPaid*/ 0.0, discount, notes);
+    QString newBillId = billingMgr->generateBill(currentBillingPatientId, items, deposit, discount, notes);
     currentBillId = newBillId;
 
     BillingRecord newBill = billingMgr->searchBill(newBillId);
-    populateBillSummaryTable(newBill);
 
-    ui->billingAmountToPayEdit->clear();
-    ui->billingDiscountEdit->clear();
+    // Reflect the authoritative stored Subtotal / Remaining Balance back
+    // into the table (should already match what recomputeBillTotals showed).
+    t->blockSignals(true);
+    t->item(kRowSubtotal, 2)->setText(QString::number(newBill.subtotal, 'f', 2));
+    t->item(kRowRemaining, 2)->setText(QString::number(newBill.remainingBalance, 'f', 2));
+    t->blockSignals(false);
+
     ui->billingNotesEdit->clear();
 
+    Patient p = patientMgr->searchPatient(currentBillingPatientId);
     QMessageBox::information(this, "Bill Generated",
                              QString("Bill %1 generated for %2.\nRemaining Balance: $%3")
                                  .arg(newBillId, p.name, QString::number(newBill.remainingBalance, 'f', 2)));
@@ -636,7 +846,11 @@ void ReceptionistWindow::onProcessPaymentClicked()
     }
 
     BillingRecord updated = billingMgr->searchBill(currentBillId);
-    populateBillSummaryTable(updated);
+
+    QTableWidget *t = ui->billingSummaryTable;
+    t->blockSignals(true);
+    t->item(kRowRemaining, 2)->setText(QString::number(updated.remainingBalance, 'f', 2));
+    t->blockSignals(false);
 
     ui->billingAmountToPayEdit->clear();
     ui->billingCardExpiryEdit->clear();

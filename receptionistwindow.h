@@ -42,6 +42,7 @@ private slots:
     void onBillingSearchClicked();
     void onGenerateBillClicked();
     void onProcessPaymentClicked();
+    void recomputeBillTotals(); // re-sums Subtotal/Remaining Balance whenever a table cell or the Discount field changes
 
 private:
     Ui::ReceptionistWindow *ui;
@@ -66,11 +67,12 @@ private:
     // Billing page helpers
     QString currentBillingPatientId;   // patient currently loaded on the Billing page
     QString currentBillId;             // bill currently displayed in Current Bill Summary (may be empty)
+    bool    m_updatingBillTable = false; // re-entrancy guard for recomputeBillTotals()
 
     void populateBillingPatientCard(const Patient &p);
     void clearBillingPatientCard();
-    void populateBillSummaryTable(const BillingRecord &bill);
-    void clearBillSummaryTable();
+    void populateBillingServiceTemplate();               // resets the table to the fixed service rows + Subtotal/Deposit/Remaining
+    void loadBillIntoTable(const BillingRecord &bill);    // fills a previously-generated bill's amounts into the template
     QString selectedPaymentMode() const; // reads the checked Payment Mode radio button
 
     QTimer *dateTimeTimer;
