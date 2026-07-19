@@ -2142,7 +2142,19 @@ QLineEdit:focus{
              <item>
               <widget class="QRadioButton" name="billingModeCash">
                <property name="styleSheet">
-                <string notr="true">border:none;background:transparent;color:black;font-weight:normal;</string>
+                <string notr="true">/* Checked state: Small, sharp inner dot */
+QRadioButton::indicator:checked {
+    border: 2px solid #0056b3; /* Outer circle color */
+    
+    background-color: qradialgradient(
+        cx: 0.5, cy: 0.5, radius: 1.0,
+        fx: 0.5, fy: 0.5,
+        stop: 0.0 #0056b3,  /* Inner dot color */
+        stop: 0.2 #0056b3,  /* Made smaller (changed from 0.4 to 0.2) */
+        stop: 0.25 #ffffff, /* Sharp edge line */
+        stop: 1.0 #ffffff   /* White background fill */
+    );
+}</string>
                </property>
                <property name="text">
                 <string>Cash</string>
@@ -2155,7 +2167,19 @@ QLineEdit:focus{
              <item>
               <widget class="QRadioButton" name="billingModeCard">
                <property name="styleSheet">
-                <string notr="true">border:none;background:transparent;color:black;font-weight:normal;</string>
+                <string notr="true">/* Checked state: Small, sharp inner dot */
+QRadioButton::indicator:checked {
+    border: 2px solid #0056b3; /* Outer circle color */
+    
+    background-color: qradialgradient(
+        cx: 0.5, cy: 0.5, radius: 1.0,
+        fx: 0.5, fy: 0.5,
+        stop: 0.0 #0056b3,  /* Inner dot color */
+        stop: 0.2 #0056b3,  /* Made smaller (changed from 0.4 to 0.2) */
+        stop: 0.25 #ffffff, /* Sharp edge line */
+        stop: 1.0 #ffffff   /* White background fill */
+    );
+}</string>
                </property>
                <property name="text">
                 <string>Card</string>
@@ -2165,7 +2189,19 @@ QLineEdit:focus{
              <item>
               <widget class="QRadioButton" name="billingModeOnline">
                <property name="styleSheet">
-                <string notr="true">border:none;background:transparent;color:black;font-weight:normal;</string>
+                <string notr="true">/* Checked state: Small, sharp inner dot */
+QRadioButton::indicator:checked {
+    border: 2px solid #0056b3; /* Outer circle color */
+    
+    background-color: qradialgradient(
+        cx: 0.5, cy: 0.5, radius: 1.0,
+        fx: 0.5, fy: 0.5,
+        stop: 0.0 #0056b3,  /* Inner dot color */
+        stop: 0.2 #0056b3,  /* Made smaller (changed from 0.4 to 0.2) */
+        stop: 0.25 #ffffff, /* Sharp edge line */
+        stop: 1.0 #ffffff   /* White background fill */
+    );
+}</string>
                </property>
                <property name="text">
                 <string>Online</string>
@@ -2175,7 +2211,19 @@ QLineEdit:focus{
              <item>
               <widget class="QRadioButton" name="billingModeInsurance">
                <property name="styleSheet">
-                <string notr="true">border:none;background:transparent;color:black;font-weight:normal;</string>
+                <string notr="true">/* Checked state: Small, sharp inner dot */
+QRadioButton::indicator:checked {
+    border: 2px solid #0056b3; /* Outer circle color */
+    
+    background-color: qradialgradient(
+        cx: 0.5, cy: 0.5, radius: 1.0,
+        fx: 0.5, fy: 0.5,
+        stop: 0.0 #0056b3,  /* Inner dot color */
+        stop: 0.2 #0056b3,  /* Made smaller (changed from 0.4 to 0.2) */
+        stop: 0.25 #ffffff, /* Sharp edge line */
+        stop: 1.0 #ffffff   /* White background fill */
+    );
+}</string>
                </property>
                <property name="text">
                 <string>Insurance</string>
