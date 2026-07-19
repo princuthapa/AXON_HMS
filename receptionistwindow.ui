@@ -1856,9 +1856,9 @@ QLineEdit:focus, QComboBox:focus, QTextEdit:focus {
          <widget class="QLabel" name="billingandfinance">
           <property name="geometry">
            <rect>
-            <x>400</x>
-            <y>40</y>
-            <width>251</width>
+            <x>370</x>
+            <y>10</y>
+            <width>301</width>
             <height>41</height>
            </rect>
           </property>
@@ -1872,9 +1872,515 @@ QLineEdit:focus, QComboBox:focus, QTextEdit:focus {
           <property name="styleSheet">
            <string notr="true">color:black;</string>
           </property>
+          <property name="alignment">
+           <set>Qt::AlignmentFlag::AlignCenter</set>
+          </property>
           <property name="text">
            <string>Billing And Finance</string>
           </property>
+         </widget>
+         <widget class="QWidget" name="billingTopRow" native="true">
+          <property name="geometry">
+           <rect>
+            <x>60</x>
+            <y>60</y>
+            <width>921</width>
+            <height>270</height>
+           </rect>
+          </property>
+          <layout class="QHBoxLayout" name="billingTopRowLayout" stretch="1,1">
+           <item>
+            <widget class="QGroupBox" name="billingLookupGroupBox">
+             <property name="font">
+              <font>
+               <family>Segoe UI</family>
+               <pointsize>12</pointsize>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">QGroupBox{
+    border:1px solid #DCDCDC;
+    border-radius:12px;
+    margin-top:10px;
+    color:black;
+}
+QGroupBox::title{
+    subcontrol-origin:margin;
+    left:12px;
+    padding:0 4px;
+}</string>
+             </property>
+             <property name="title">
+              <string>Patient Lookup &amp; Information</string>
+             </property>
+             <layout class="QVBoxLayout" name="billingLookupLayout">
+              <item>
+               <layout class="QHBoxLayout" name="billingSearchRow">
+                <item>
+                 <widget class="QLineEdit" name="billingSearchEdit">
+                  <property name="placeholderText">
+                   <string>Patient Name (or ID)</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="billingSearchBtn">
+                  <property name="styleSheet">
+                   <string notr="true">QPushButton{
+    background-color:#0055a4;
+    color:white;
+    border:none;
+    border-radius:6px;
+    font-weight:bold;
+    padding:6px 18px;
+}
+QPushButton:hover{
+    background-color:#004488;
+}</string>
+                  </property>
+                  <property name="text">
+                   <string>Search</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <widget class="QWidget" name="billingPatientCard" native="true">
+                <property name="styleSheet">
+                 <string notr="true">QWidget#billingPatientCard{
+    background-color:#f7f9fc;
+    border:1px solid #E5E7EB;
+    border-radius:10px;
+}</string>
+                </property>
+                <layout class="QHBoxLayout" name="billingPatientCardLayout">
+                 <item>
+                  <widget class="QLabel" name="billingPatientAvatar">
+                   <property name="minimumSize">
+                    <size>
+                     <width>64</width>
+                     <height>64</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>64</width>
+                     <height>64</height>
+                    </size>
+                   </property>
+                   <property name="styleSheet">
+                    <string notr="true">background-color:#cbd5e1;border-radius:32px;color:#334155;font-weight:bold;font-size:20px;</string>
+                   </property>
+                   <property name="text">
+                    <string>?</string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignmentFlag::AlignCenter</set>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <layout class="QVBoxLayout" name="billingPatientInfoLayout">
+                   <item>
+                    <widget class="QLabel" name="billingPatientIdLabel">
+                     <property name="styleSheet">
+                      <string notr="true">color:black;border:none;background:transparent;font-weight:bold;</string>
+                     </property>
+                     <property name="text">
+                      <string>Patient ID: —</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QLabel" name="billingPatientNameLabel">
+                     <property name="styleSheet">
+                      <string notr="true">color:black;border:none;background:transparent;</string>
+                     </property>
+                     <property name="text">
+                      <string>Name: —</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QLabel" name="billingPatientAgeLabel">
+                     <property name="styleSheet">
+                      <string notr="true">color:black;border:none;background:transparent;</string>
+                     </property>
+                     <property name="text">
+                      <string>Age: —</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QLabel" name="billingPatientGenderLabel">
+                     <property name="styleSheet">
+                      <string notr="true">color:black;border:none;background:transparent;</string>
+                     </property>
+                     <property name="text">
+                      <string>Gender: —</string>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <widget class="QGroupBox" name="billingSummaryGroupBox">
+             <property name="font">
+              <font>
+               <family>Segoe UI</family>
+               <pointsize>12</pointsize>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">QGroupBox{
+    border:1px solid #DCDCDC;
+    border-radius:12px;
+    margin-top:10px;
+    color:black;
+}
+QGroupBox::title{
+    subcontrol-origin:margin;
+    left:12px;
+    padding:0 4px;
+}</string>
+             </property>
+             <property name="title">
+              <string>Current Bill Summary</string>
+             </property>
+             <layout class="QVBoxLayout" name="billingSummaryLayout">
+              <item>
+               <widget class="QTableWidget" name="billingSummaryTable">
+                <property name="styleSheet">
+                 <string notr="true">QTableWidget{
+    background-color:white;
+    border:none;
+    gridline-color:#E5E5E5;
+    font-size:11pt;
+    color:black;
+}
+QHeaderView::section{
+    background-color:#F5F5F5;
+    border:none;
+    padding:6px;
+    font-weight:bold;
+    color:black;
+}</string>
+                </property>
+                <property name="editTriggers">
+                 <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
+                </property>
+                <property name="showGrid">
+                 <bool>false</bool>
+                </property>
+                <property name="columnCount">
+                 <number>3</number>
+                </property>
+                <attribute name="horizontalHeaderStretchLastSection">
+                 <bool>true</bool>
+                </attribute>
+                <attribute name="verticalHeaderVisible">
+                 <bool>false</bool>
+                </attribute>
+                <column>
+                 <property name="text">
+                  <string>Service</string>
+                 </property>
+                </column>
+                <column>
+                 <property name="text">
+                  <string>Description</string>
+                 </property>
+                </column>
+                <column>
+                 <property name="text">
+                  <string>Amount($)</string>
+                 </property>
+                </column>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+         <widget class="QGroupBox" name="billingPaymentGroupBox">
+          <property name="geometry">
+           <rect>
+            <x>60</x>
+            <y>340</y>
+            <width>921</width>
+            <height>270</height>
+           </rect>
+          </property>
+          <property name="font">
+           <font>
+            <family>Segoe UI</family>
+            <pointsize>12</pointsize>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">QGroupBox{
+    border:1px solid #DCDCDC;
+    border-radius:12px;
+    margin-top:10px;
+    color:black;
+}
+QGroupBox::title{
+    subcontrol-origin:margin;
+    left:12px;
+    padding:0 4px;
+}
+QLineEdit{
+    border:1px solid #c8d7e6;
+    border-radius:6px;
+    padding:6px 8px;
+    color:black;
+    background:white;
+}
+QLineEdit:focus{
+    border:1px solid #0055a4;
+}</string>
+          </property>
+          <property name="title">
+           <string>Payment Details</string>
+          </property>
+          <layout class="QVBoxLayout" name="billingPaymentOuterLayout">
+           <item>
+            <layout class="QHBoxLayout" name="billingModeRow">
+             <item>
+              <widget class="QLabel" name="billingModeLabel">
+               <property name="styleSheet">
+                <string notr="true">border:none;background:transparent;color:black;</string>
+               </property>
+               <property name="text">
+                <string>Payment Mode:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QRadioButton" name="billingModeCash">
+               <property name="styleSheet">
+                <string notr="true">border:none;background:transparent;color:black;font-weight:normal;</string>
+               </property>
+               <property name="text">
+                <string>Cash</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QRadioButton" name="billingModeCard">
+               <property name="styleSheet">
+                <string notr="true">border:none;background:transparent;color:black;font-weight:normal;</string>
+               </property>
+               <property name="text">
+                <string>Card</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QRadioButton" name="billingModeOnline">
+               <property name="styleSheet">
+                <string notr="true">border:none;background:transparent;color:black;font-weight:normal;</string>
+               </property>
+               <property name="text">
+                <string>Online</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QRadioButton" name="billingModeInsurance">
+               <property name="styleSheet">
+                <string notr="true">border:none;background:transparent;color:black;font-weight:normal;</string>
+               </property>
+               <property name="text">
+                <string>Insurance</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="billingModeSpacer">
+               <property name="orientation">
+                <enum>Qt::Orientation::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QGridLayout" name="billingFieldsGrid">
+             <item row="0" column="0">
+              <widget class="QLabel" name="billingAmountToPayLabel">
+               <property name="styleSheet">
+                <string notr="true">border:none;background:transparent;color:black;font-weight:normal;</string>
+               </property>
+               <property name="text">
+                <string>Amount to Pay</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QLabel" name="billingCardExpiryLabel">
+               <property name="styleSheet">
+                <string notr="true">border:none;background:transparent;color:black;font-weight:normal;</string>
+               </property>
+               <property name="text">
+                <string>Card Expiry</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="2">
+              <widget class="QLabel" name="billingCVCLabel">
+               <property name="styleSheet">
+                <string notr="true">border:none;background:transparent;color:black;font-weight:normal;</string>
+               </property>
+               <property name="text">
+                <string>CVC</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="3">
+              <widget class="QLabel" name="billingDiscountLabel">
+               <property name="styleSheet">
+                <string notr="true">border:none;background:transparent;color:black;font-weight:normal;</string>
+               </property>
+               <property name="text">
+                <string>Discount</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLineEdit" name="billingAmountToPayEdit">
+               <property name="placeholderText">
+                <string>0.00</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QLineEdit" name="billingCardExpiryEdit">
+               <property name="placeholderText">
+                <string>MM/YY</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="2">
+              <widget class="QLineEdit" name="billingCVCEdit">
+               <property name="echoMode">
+                <enum>QLineEdit::EchoMode::Password</enum>
+               </property>
+               <property name="placeholderText">
+                <string>CVC</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="3">
+              <widget class="QLineEdit" name="billingDiscountEdit">
+               <property name="placeholderText">
+                <string>0.00</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="billingNotesLabel">
+               <property name="styleSheet">
+                <string notr="true">border:none;background:transparent;color:black;font-weight:normal;</string>
+               </property>
+               <property name="text">
+                <string>Notes</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="0" colspan="4">
+              <widget class="QLineEdit" name="billingNotesEdit">
+               <property name="placeholderText">
+                <string>Enter your notes here...</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="billingButtonsRow">
+             <item>
+              <spacer name="billingButtonsSpacer">
+               <property name="orientation">
+                <enum>Qt::Orientation::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btnGenerateBill">
+               <property name="styleSheet">
+                <string notr="true">QPushButton{
+    background-color:#0055a4;
+    color:white;
+    border:none;
+    border-radius:6px;
+    font-weight:bold;
+    padding:10px 22px;
+}
+QPushButton:hover{
+    background-color:#004488;
+}
+QPushButton:pressed{
+    background-color:#003366;
+}</string>
+               </property>
+               <property name="text">
+                <string>Generate Bill</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btnProcessPayment">
+               <property name="styleSheet">
+                <string notr="true">QPushButton{
+    background-color:#0d9488;
+    color:white;
+    border:none;
+    border-radius:6px;
+    font-weight:bold;
+    padding:10px 22px;
+}
+QPushButton:hover{
+    background-color:#0f766e;
+}
+QPushButton:pressed{
+    background-color:#115e59;
+}</string>
+               </property>
+               <property name="text">
+                <string>Process Payment</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
          </widget>
         </widget>
        </widget>
