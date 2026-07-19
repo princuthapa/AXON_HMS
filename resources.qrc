@@ -14,5 +14,6 @@
         <file>staff_database.csv</file>
         <file>patient_database.csv</file>
         <file>appointment_database.csv</file>
+        <file>billing_database.csv</file>
     </qresource>
 </RCC>
