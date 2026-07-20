@@ -336,8 +336,26 @@ QPushButton::menu-indicator{
          <x>30</x>
          <y>300</y>
          <width>571</width>
-         <height>341</height>
+         <height>470</height>
         </rect>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>470</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>470</height>
+        </size>
        </property>
       </widget>
       <widget class="QTableWidget" name="appointmentsTable">
@@ -346,19 +364,19 @@ QPushButton::menu-indicator{
          <x>630</x>
          <y>300</y>
          <width>450</width>
-         <height>341</height>
+         <height>470</height>
         </rect>
        </property>
        <property name="minimumSize">
         <size>
          <width>450</width>
-         <height>0</height>
+         <height>470</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
          <width>450</width>
-         <height>16777215</height>
+         <height>470</height>
         </size>
        </property>
       </widget>
@@ -368,8 +386,20 @@ QPushButton::menu-indicator{
          <x>30</x>
          <y>240</y>
          <width>321</width>
-         <height>41</height>
+         <height>50</height>
         </rect>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>50</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>50</height>
+        </size>
        </property>
        <property name="text">
         <string>TextLabel</string>
@@ -381,8 +411,20 @@ QPushButton::menu-indicator{
          <x>630</x>
          <y>240</y>
          <width>311</width>
-         <height>41</height>
+         <height>50</height>
         </rect>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>50</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>50</height>
+        </size>
        </property>
        <property name="text">
         <string>TextLabel</string>

@@ -16,6 +16,7 @@
 #include <QScrollArea>
 #include <QComboBox>
 #include <QDebug>
+#include<QMessageBox>
 
 static const QString kPlainLabelD =
     "border:none;background:transparent;background-color:transparent;";
@@ -130,7 +131,7 @@ doctorwindow::doctorwindow(const QString &employeeName, QWidget *parent) :
     setupStatsSection();
     populatePatientList();
     populateAppointmentsTable();
-    setupOverviewLayout();  // MUST BE LAST!
+    setupOverviewLayout();
 
     // Setup other pages
     setupPatientListPage();
@@ -187,6 +188,84 @@ void doctorwindow::logout()
     login->show();
 }
 
+void doctorwindow::setupOverviewLayout()
+{
+    QWidget *overviewPage = ui->pageOverview;
+    if (!overviewPage) return;
+
+    // Clear existing layout
+    QLayout *oldLayout = overviewPage->layout();
+    if (oldLayout) {
+        QLayoutItem *item;
+        while ((item = oldLayout->takeAt(0)) != nullptr) {
+            // Don't delete widgets
+        }
+        delete oldLayout;
+    }
+
+    // Reparent all widgets to the page
+    ui->statsContainer->setParent(overviewPage);
+    ui->lblPatientsTitle->setParent(overviewPage);
+    ui->patientListWidget->setParent(overviewPage);
+    ui->lblAppointmentsTtitle->setParent(overviewPage);
+    ui->appointmentsTable->setParent(overviewPage);
+
+    // Set size policies
+    ui->statsContainer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    ui->statsContainer->setFixedHeight(170);
+
+    ui->patientListWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    ui->appointmentsTable->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+    // ===== MAIN LAYOUT =====
+    QVBoxLayout *mainLayout = new QVBoxLayout(overviewPage);
+    mainLayout->setSpacing(8);  // Reduced spacing
+    mainLayout->setContentsMargins(15, 8, 15, 15);
+
+    // Stats
+    mainLayout->addWidget(ui->statsContainer);
+
+    // ===== CONTENT =====
+    QHBoxLayout *contentLayout = new QHBoxLayout();
+    contentLayout->setSpacing(12);
+
+    // ----- LEFT: My Patients -----
+    QVBoxLayout *leftLayout = new QVBoxLayout();
+    leftLayout->setSpacing(4);
+
+    ui->lblPatientsTitle->setText("My Patients");
+    ui->lblPatientsTitle->setStyleSheet(
+        "font-size: 13px;"
+        "font-weight: bold;"
+        "color: #2c3e50;"
+        );
+    leftLayout->addWidget(ui->lblPatientsTitle);
+
+    ui->patientListWidget->setMinimumHeight(80);
+    leftLayout->addWidget(ui->patientListWidget, 1);
+
+    // ----- RIGHT: Today's Appointments -----
+    QVBoxLayout *rightLayout = new QVBoxLayout();
+    rightLayout->setSpacing(4);
+
+    ui->lblAppointmentsTtitle->setText("Today's Appointments");
+    ui->lblAppointmentsTtitle->setStyleSheet(
+        "font-size: 13px;"
+        "font-weight: bold;"
+        "color: #2c3e50;"
+        );
+    rightLayout->addWidget(ui->lblAppointmentsTtitle);
+
+    ui->appointmentsTable->setMinimumHeight(80);
+    rightLayout->addWidget(ui->appointmentsTable, 1);
+
+    contentLayout->addLayout(leftLayout, 1);
+    contentLayout->addLayout(rightLayout, 1);
+
+    mainLayout->addLayout(contentLayout, 1);
+
+    overviewPage->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+}
 // ===== SETUP STATS SECTION =====
 void doctorwindow::setupStatsSection()
 {
@@ -310,60 +389,103 @@ void doctorwindow::populatePatientList()
     patientMgr->reload();
     ui->patientListWidget->clear();
 
+    ui->patientListWidget->setStyleSheet(
+        "QListWidget {"
+        "   background-color: #ffffff;"
+        "   border: 1px solid #e9ecef;"
+        "   border-radius: 8px;"
+        "   padding: 2px;"
+        "}"
+        "QListWidget::item {"
+        "   padding: 4px 8px;"
+        "   border-bottom: 1px solid #f1f5f9;"
+        "}"
+        "QListWidget::item:hover {"
+        "   background-color: #f8fafc;"
+        "}"
+        "QListWidget::item:selected {"
+        "   background-color: #f0f4f9;"
+        "}"
+        );
+
     for (const auto &p : patientMgr->getAllPatients()) {
         if (p.assignedDoctor.trimmed().compare(currentUserName.trimmed(), Qt::CaseInsensitive) != 0)
             continue;
 
-        // Create custom widget with View button
         QWidget *itemWidget = new QWidget();
         QHBoxLayout *itemLayout = new QHBoxLayout(itemWidget);
-        itemLayout->setContentsMargins(5, 5, 5, 5);
-        itemLayout->setSpacing(10);
+        itemLayout->setContentsMargins(4, 2, 4, 2);  // Minimal padding
+        itemLayout->setSpacing(8);
 
-        QString displayText = QString("%1 — %2 (%3)")
-                                  .arg(p.name, p.diagnosisTreatment, p.status);
+        QString diagnosisText = p.diagnosisTreatment.isEmpty() ? "No diagnosis" : p.diagnosisTreatment;
+
+        QString displayText = QString("%1 — %2")
+                                  .arg(p.name)
+                                  .arg(diagnosisText);
 
         QLabel *infoLabel = new QLabel(displayText);
         infoLabel->setStyleSheet(
-            "font-size: 13px;"
-            "color: #2c3e50;"
+            "font-size: 12px;"
             "font-weight: 500;"
+            "color: #1e293b;"
             );
-        infoLabel->setFixedWidth(250);
+        infoLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
-        QPushButton *viewBtn = new QPushButton("👁️ View");
+        QLabel *statusLabel = new QLabel(p.status.isEmpty() ? "UNKNOWN" : p.status.toUpper());
+        statusLabel->setAlignment(Qt::AlignCenter);
+        statusLabel->setStyleSheet(
+            "font-weight: bold;"
+            "font-size: 10px;"
+            "padding: 2px 10px;"
+            "border: none;"
+            "background-color: #e8f0fe;"
+            "color: #1a4f8a;"
+            "border-radius: 10px;"
+            );
+        statusLabel->setFixedWidth(80);
+        statusLabel->setFixedHeight(22);
+
+        QPushButton *viewBtn = new QPushButton("View");
         viewBtn->setObjectName("viewBtn");
         viewBtn->setStyleSheet(
             "QPushButton#viewBtn {"
             "   background-color: #e8f0fe;"
             "   color: #1a73e8;"
             "   border: none;"
-            "   border-radius: 6px;"
-            "   padding: 6px 20px;"
-            "   font-size: 12px;"
+            "   border-radius: 4px;"
+            "   padding: 2px 12px;"
+            "   font-size: 11px;"
             "   font-weight: 500;"
             "}"
             "QPushButton#viewBtn:hover {"
             "   background-color: #d2e3fc;"
             "}"
             );
+        viewBtn->setFixedHeight(24);
+        viewBtn->setFixedWidth(55);
+        viewBtn->setCursor(Qt::PointingHandCursor);
         viewBtn->setProperty("patientId", p.id);
 
         connect(viewBtn, &QPushButton::clicked, this, [this, p]() {
             viewPatientDetails(p.id);
         });
 
-        itemLayout->addWidget(infoLabel);
-        itemLayout->addStretch();
+        itemLayout->addWidget(infoLabel, 1);
+        itemLayout->addWidget(statusLabel);
         itemLayout->addWidget(viewBtn);
 
         QListWidgetItem *listItem = new QListWidgetItem(ui->patientListWidget);
-        listItem->setSizeHint(itemWidget->sizeHint());
+        listItem->setSizeHint(QSize(itemWidget->sizeHint().width(), 34));  // Compact height
         ui->patientListWidget->setItemWidget(listItem, itemWidget);
     }
 
     if (ui->patientListWidget->count() == 0) {
-        ui->patientListWidget->addItem("No patients currently assigned.");
+        QListWidgetItem *emptyItem = new QListWidgetItem(ui->patientListWidget);
+        emptyItem->setText("No patients currently assigned.");
+        emptyItem->setTextAlignment(Qt::AlignCenter);
+        emptyItem->setForeground(QColor("#95a5a6"));
+        emptyItem->setSizeHint(QSize(ui->patientListWidget->width(), 40));
+        ui->patientListWidget->addItem(emptyItem);
     }
 }
 
@@ -379,10 +501,33 @@ void doctorwindow::populateAppointmentsTable()
         QStringList() << "Time" << "Patient" << "Reason" << "Status"
         );
 
-    ui->appointmentsTable->setColumnWidth(0, 90);
-    ui->appointmentsTable->setColumnWidth(1, 130);
-    ui->appointmentsTable->setColumnWidth(2, 150);
-    ui->appointmentsTable->setColumnWidth(3, 90);
+    ui->appointmentsTable->setStyleSheet(
+        "QTableWidget {"
+        "   background-color: #ffffff;"
+        "   border: 1px solid #e9ecef;"
+        "   border-radius: 8px;"
+        "   gridline-color: #f1f5f9;"
+        "}"
+        "QTableWidget::item {"
+        "   padding: 4px 8px;"
+        "   color: #1e293b;"
+        "}"
+        "QTableWidget::item:hover {"
+        "   background-color: #f8fafc;"
+        "}"
+        "QHeaderView::section {"
+        "   background-color: #f8fafc;"
+        "   padding: 6px 8px;"
+        "   border: none;"
+        "   font-weight: 600;"
+        "   font-size: 11px;"
+        "   color: #94a3b8;"
+        "   text-transform: uppercase;"
+        "}"
+        );
+
+    ui->appointmentsTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->appointmentsTable->verticalHeader()->setDefaultSectionSize(32);  // Compact rows
 
     QVector<Appointment> todaysForDoctor;
     for (const auto &a : apptMgr->getTodaysAppointments()) {
@@ -408,19 +553,18 @@ void doctorwindow::populateAppointmentsTable()
         if (status.compare("Confirmed", Qt::CaseInsensitive) == 0) {
             statusItem->setBackground(QColor("#eafaf1"));
             statusItem->setForeground(QColor("#1e8449"));
-            statusItem->setText("Confirmed");
         } else if (status.compare("Waiting", Qt::CaseInsensitive) == 0 ||
                    status.compare("Pending", Qt::CaseInsensitive) == 0) {
             statusItem->setBackground(QColor("#fdf2e9"));
             statusItem->setForeground(QColor("#a04000"));
-            statusItem->setText("Pending");
         } else if (status.compare("Now", Qt::CaseInsensitive) == 0) {
             statusItem->setBackground(QColor("#fef9e7"));
             statusItem->setForeground(QColor("#b7950b"));
-            statusItem->setText("Now");
         } else if (status.compare("Cancelled", Qt::CaseInsensitive) == 0) {
             statusItem->setForeground(QColor("#e74c3c"));
-            statusItem->setText("Cancelled");
+        } else if (status.compare("Completed", Qt::CaseInsensitive) == 0) {
+            statusItem->setBackground(QColor("#e8f0fe"));
+            statusItem->setForeground(QColor("#1a4f8a"));
         }
 
         ui->appointmentsTable->setItem(row, 0, timeItem);
@@ -434,75 +578,14 @@ void doctorwindow::populateAppointmentsTable()
     ui->appointmentsTable->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui->appointmentsTable->setSelectionMode(QAbstractItemView::SingleSelection);
 
-    if (ui->appointmentsTable->rowCount() > 0) {
-        ui->appointmentsTable->selectRow(0);
+    if (ui->appointmentsTable->rowCount() == 0) {
+        ui->appointmentsTable->setRowCount(1);
+        QTableWidgetItem *emptyItem = new QTableWidgetItem("No appointments today.");
+        emptyItem->setTextAlignment(Qt::AlignCenter);
+        emptyItem->setForeground(QColor("#95a5a6"));
+        ui->appointmentsTable->setSpan(0, 0, 1, 4);
+        ui->appointmentsTable->setItem(0, 0, emptyItem);
     }
-}
-
-// ===== SETUP OVERVIEW LAYOUT (GRID) =====
-void doctorwindow::setupOverviewLayout()
-{
-    QWidget *overviewPage = ui->pageOverview;
-    if (!overviewPage) return;
-
-    // Remove existing layout if any
-    QLayout *oldLayout = overviewPage->layout();
-    if (oldLayout) {
-        delete oldLayout;
-    }
-
-    // Create grid layout
-    QGridLayout *gridLayout = new QGridLayout(overviewPage);
-    gridLayout->setSpacing(15);
-    gridLayout->setContentsMargins(20, 10, 20, 10);
-
-    // Row 0: Stats (spanning 2 columns)
-    if (ui->statsContainer->parent() != overviewPage) {
-        ui->statsContainer->setParent(overviewPage);
-    }
-    gridLayout->addWidget(ui->statsContainer, 0, 0, 1, 2);
-
-    // Row 1: Titles
-    if (ui->lblPatientsTitle->parent() != overviewPage) {
-        ui->lblPatientsTitle->setParent(overviewPage);
-    }
-    if (ui->lblAppointmentsTtitle->parent() != overviewPage) {
-        ui->lblAppointmentsTtitle->setParent(overviewPage);
-    }
-
-    ui->lblPatientsTitle->setText("My Patients");
-    ui->lblPatientsTitle->setStyleSheet(
-        "font-size: 16px;"
-        "font-weight: bold;"
-        "color: #2c3e50;"
-        "padding: 10px 0px 5px 0px;"
-        );
-    gridLayout->addWidget(ui->lblPatientsTitle, 1, 0);
-
-    ui->lblAppointmentsTtitle->setText("Today's Appointments");
-    ui->lblAppointmentsTtitle->setStyleSheet(
-        "font-size: 16px;"
-        "font-weight: bold;"
-        "color: #2c3e50;"
-        "padding: 10px 0px 5px 0px;"
-        );
-    gridLayout->addWidget(ui->lblAppointmentsTtitle, 1, 1);
-
-    // Row 2: Patient List and Appointments Table
-    if (ui->patientListWidget->parent() != overviewPage) {
-        ui->patientListWidget->setParent(overviewPage);
-    }
-    if (ui->appointmentsTable->parent() != overviewPage) {
-        ui->appointmentsTable->setParent(overviewPage);
-    }
-
-    gridLayout->addWidget(ui->patientListWidget, 2, 0);
-    gridLayout->addWidget(ui->appointmentsTable, 2, 1);
-
-    // Set column stretches
-    gridLayout->setColumnStretch(0, 1);
-    gridLayout->setColumnStretch(1, 1);
-    gridLayout->setRowStretch(2, 1);
 }
 
 // ===== VIEW PATIENT DETAILS =====
@@ -510,12 +593,25 @@ void doctorwindow::viewPatientDetails(const QString &patientId)
 {
     Patient p = patientMgr->searchPatient(patientId);
     if (p.id.isEmpty()) {
-        ui->message->setText("Patient not found.");
+        QMessageBox::warning(this, "Patient Not Found",
+                             "No patient found with ID: " + patientId);
         return;
     }
 
-    ui->message->setText(QString("Viewing details for: %1 (ID: %2) — Diagnosis: %3")
-                             .arg(p.name, p.id, p.diagnosisTreatment));
+    // Show patient details in a message box
+    QString details = QString(
+                          "Patient ID: %1\n"
+                          "Name: %2\n"
+                          "Age: %3\n"
+                          "Gender: %4\n"
+                          "Doctor: %5\n"
+                          "Diagnosis: %6\n"
+                          "Status: %7"
+                          ).arg(p.id, p.name, p.age, p.gender, p.assignedDoctor,
+                               p.diagnosisTreatment.isEmpty() ? "N/A" : p.diagnosisTreatment,
+                               p.status.isEmpty() ? "Unknown" : p.status);
+
+    QMessageBox::information(this, "Patient Details", details);
 }
 
 // ===== PATIENT LIST PAGE =====
