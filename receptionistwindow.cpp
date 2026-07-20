@@ -103,6 +103,37 @@ ReceptionistWindow::ReceptionistWindow(QWidget *parent)
     , ui(new Ui::ReceptionistWindow)
 {
     ui->setupUi(this);
+    // 1. Set the initial state when the window opens
+    ui->radioCash->setChecked(true);
+    ui->Stackedwidgetforpayment->setCurrentIndex(0); // Shows Page 1 (Cash)
+
+    // 2. Connect the "Cash" radio button
+    connect(ui->radioCash, &QRadioButton::toggled, this, [this](bool checked) {
+        if (checked) {
+            ui->Stackedwidgetforpayment->setCurrentIndex(0); // Flip to Cash page
+        }
+    });
+
+    // 3. Connect the "Card" radio button
+    connect(ui->radioCard, &QRadioButton::toggled, this, [this](bool checked) {
+        if (checked) {
+            ui->Stackedwidgetforpayment->setCurrentIndex(1); // Flip to Card page
+        }
+    });
+
+    // 4. Connect the "Online" radio button
+    connect(ui->radioOnline, &QRadioButton::toggled, this, [this](bool checked) {
+        if (checked) {
+            ui->Stackedwidgetforpayment->setCurrentIndex(2); // Flip to Online page
+        }
+    });
+
+    // 5. Connect the "Insurance" radio button
+    connect(ui->radioInsurance, &QRadioButton::toggled, this, [this](bool checked) {
+        if (checked) {
+            ui->Stackedwidgetforpayment->setCurrentIndex(3); // Flip to Insurance page
+        }
+    });
     this->setWindowTitle("AXON-HMS: Receptionist Dashboard");
 
     // Shared backend managers — these read/write the SAME CSV files that
@@ -128,7 +159,7 @@ ReceptionistWindow::ReceptionistWindow(QWidget *parent)
         2, new AmountColumnDelegate(ui->billingSummaryTable, this));
     connect(ui->billingSummaryTable, &QTableWidget::itemChanged,
             this, &ReceptionistWindow::recomputeBillTotals);
-    connect(ui->billingDiscountEdit, &QLineEdit::textChanged,
+    connect(ui->discountInput, &QLineEdit::textChanged,
             this, [this](const QString &) { recomputeBillTotals(); });
     populateBillingServiceTemplate();
 
@@ -302,7 +333,7 @@ void ReceptionistWindow::onBillingClicked()
     currentBillId.clear();
     clearBillingPatientCard();
     ui->billingSearchEdit->clear();
-    ui->billingDiscountEdit->clear();
+    ui->discountInput->clear();
     ui->billingNotesEdit->clear();
     populateBillingServiceTemplate();
 }
@@ -581,9 +612,9 @@ void ReceptionistWindow::refreshScheduleTable() {
 
 QString ReceptionistWindow::selectedPaymentMode() const
 {
-    if (ui->billingModeCard->isChecked())      return "Card";
-    if (ui->billingModeOnline->isChecked())    return "Online";
-    if (ui->billingModeInsurance->isChecked()) return "Insurance";
+    if (ui->radioCard->isChecked())      return "Card";
+    if (ui->radioOnline->isChecked())    return "Online";
+    if (ui->radioInsurance->isChecked()) return "Insurance";
     return "Cash"; // default / ui->billingModeCash checked
 }
 
@@ -769,9 +800,9 @@ void ReceptionistWindow::loadBillIntoTable(const BillingRecord &bill)
 
     t->blockSignals(false);
 
-    ui->billingDiscountEdit->blockSignals(true);
-    ui->billingDiscountEdit->setText(QString::number(bill.discount, 'f', 2));
-    ui->billingDiscountEdit->blockSignals(false);
+    ui->discountInput->blockSignals(true);
+    ui->discountInput->setText(QString::number(bill.discount, 'f', 2));
+    ui->discountInput->blockSignals(false);
 
     // Show the bill's actual stored Subtotal / Remaining Balance (which may
     // already reflect prior payments processed against it) rather than a
@@ -816,7 +847,7 @@ void ReceptionistWindow::recomputeBillTotals()
     if (QTableWidgetItem *dep = t->item(depositRow, 2))
         deposit = dep->text().trimmed().toDouble();
 
-    double discount = ui->billingDiscountEdit->text().trimmed().toDouble();
+    double discount = ui->discountInput->text().trimmed().toDouble();
 
     double remaining = subtotal - deposit - discount;
     if (remaining < 0.0) remaining = 0.0;
@@ -873,7 +904,7 @@ void ReceptionistWindow::onBillingSearchClicked()
     if (latest.billId.isEmpty()) {
         // No bill on file yet — start from a clean, pre-filled template.
         currentBillId.clear();
-        ui->billingDiscountEdit->clear();
+        ui->discountInput->clear();
         populateBillingServiceTemplate();
     } else {
         currentBillId = latest.billId;
@@ -919,7 +950,7 @@ void ReceptionistWindow::onGenerateBillClicked()
     if (QTableWidgetItem *dep = t->item(depositRow, 2))
         deposit = dep->text().trimmed().toDouble();
 
-    double discount = ui->billingDiscountEdit->text().trimmed().toDouble();
+    double discount = ui->discountInput->text().trimmed().toDouble();
     QString notes = ui->billingNotesEdit->text().trimmed();
 
     QString newBillId = billingMgr->generateBill(currentBillingPatientId, items, deposit, discount, notes);
@@ -953,7 +984,7 @@ void ReceptionistWindow::onProcessPaymentClicked()
     }
 
     bool okAmount = false;
-    double paymentAmount = ui->billingAmountToPayEdit->text().trimmed().toDouble(&okAmount);
+    double paymentAmount = ui->amountToPayInput->text().trimmed().toDouble(&okAmount);
     if (!okAmount || paymentAmount <= 0.0) {
         QMessageBox::warning(this, "Invalid Amount", "Enter a valid amount in \"Amount to Pay\" before processing payment.");
         return;
@@ -975,13 +1006,105 @@ void ReceptionistWindow::onProcessPaymentClicked()
     t->item(remainingRow, 2)->setText(QString::number(updated.remainingBalance, 'f', 2));
     t->blockSignals(false);
 
-    ui->billingAmountToPayEdit->clear();
-    ui->billingCardExpiryEdit->clear();
-    ui->billingCVCEdit->clear();
+    ui->amountToPayInput->clear();
     ui->billingNotesEdit->clear();
 
     QMessageBox::information(this, "Payment Processed",
                              QString("Payment of $%1 (%2) applied to bill %3.\nRemaining Balance: $%4")
                                  .arg(QString::number(paymentAmount, 'f', 2), mode, currentBillId,
                                       QString::number(updated.remainingBalance, 'f', 2)));
+}
+void ReceptionistWindow::on_btnGenerateBill_clicked()
+{
+    // 1. Grab the common billing details
+    double amountToPay = ui->amountToPayInput->text().toDouble();
+    double discount = ui->discountInput->text().toDouble();
+    double finalAmount = amountToPay - discount;
+
+    QString paymentMode = "";
+    QString transactionDetails = "";
+
+    // 2. Determine which payment method was used based on the Radio Buttons
+    if (ui->radioCash->isChecked()) {
+        paymentMode = "Cash";
+        transactionDetails = "Tendered: $" + ui->amountTenderedInput->text() +
+                             " | Change: $" + ui->changeDueInput->text();
+
+    } else if (ui->radioCard->isChecked()) {
+        paymentMode = "Card";
+        // Grab the Trans ID / Approval Code from the Card page
+        transactionDetails = "Approval Code: " + ui->cardTransIdInput->text();
+
+    } else if (ui->radioOnline->isChecked()) {
+        // Grab the selected platform from the combobox and the Trans ID
+        paymentMode = "Online (" + ui->onlinePlatformCombo->currentText() + ")";
+        transactionDetails = "Ref No: " + ui->onlineTransIdInput->text();
+
+    } else if (ui->radioInsurance->isChecked()) {
+        // Grab the insurance provider and covered amount
+        paymentMode = "Insurance (" + ui->insuranceProviderCombo->currentText() + ")";
+        transactionDetails = "Policy: " + ui->policyIdInput->text() +
+                             " | Covered: $" + ui->coveredAmountInput->text();
+    } else {
+        QMessageBox::warning(this, "Error", "Please select a payment mode.");
+        return; // Stop execution if no radio button is checked
+    }
+
+    // 3. Add the data to the "Current Bill Summary" TableWidget
+    // Get the current row count to insert at the bottom
+    int rowCount = ui->billingSummaryTable->rowCount();
+    ui->billingSummaryTable->insertRow(rowCount);
+
+    // Column 0: Service (Using Payment Mode for the summary)
+    QTableWidgetItem *itemService = new QTableWidgetItem("Payment - " + paymentMode);
+    ui->billingSummaryTable->setItem(rowCount, 0, itemService);
+
+    // Column 1: Description (Using the specific transaction details)
+    QTableWidgetItem *itemDesc = new QTableWidgetItem(transactionDetails);
+    ui->billingSummaryTable->setItem(rowCount, 1, itemDesc);
+
+    // Column 2: Amount($)
+    QTableWidgetItem *itemAmount = new QTableWidgetItem(QString::number(finalAmount, 'f', 2));
+    ui->billingSummaryTable->setItem(rowCount, 2, itemAmount);
+
+
+    // --- 4. CSV SAVING LOGIC ---
+
+    // Get the current date and time
+    QString currentDate = QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss");
+
+    // Target the CSV file
+    QFile file("billing.csv");
+
+    // Open the file in Append mode
+    if (file.open(QIODevice::Append | QIODevice::WriteOnly | QIODevice::Text)) {
+        QTextStream out(&file);
+
+        // If the file is completely empty, write headers first
+        if (file.size() == 0) {
+            out << "Date,Payment Mode,Transaction Details,Amount To Pay,Discount,Final Amount\n";
+        }
+
+        // Write the variables into the CSV, separated by commas
+        out << currentDate << ","
+            << paymentMode << ","
+            << "\"" << transactionDetails << "\","
+            << amountToPay << ","
+            << discount << ","
+            << finalAmount << "\n";
+
+        file.close(); // Close the file to save it
+
+    } else {
+        // Stop execution and warn if file can't be saved
+        QMessageBox::warning(this, "File Error", "Could not open billing.csv to save the record.");
+        return;
+    }
+
+    // 5. Show a Success Message
+    QMessageBox::information(this, "Success", "Bill successfully generated and saved to CSV!");
+
+    // Optional: Clear the inputs after generating the bill
+    ui->amountToPayInput->clear();
+    ui->discountInput->clear();
 }

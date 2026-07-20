@@ -44,7 +44,8 @@ private slots:
     void onProcessPaymentClicked();
     void recomputeBillTotals(); // re-sums Subtotal/Remaining Balance whenever a table cell or the Discount field changes
     void onAddBillingRowClicked();    // inserts a new, fully-editable custom line item
-    void onRemoveBillingRowClicked(); // deletes the currently-selected line item row
+    void onRemoveBillingRowClicked();
+    void on_btnGenerateBill_clicked();    // deletes the currently-selected line item row
 
 private:
     Ui::ReceptionistWindow *ui;
