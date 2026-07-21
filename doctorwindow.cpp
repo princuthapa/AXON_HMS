@@ -39,12 +39,31 @@ doctorwindow::doctorwindow(const QString &employeeName, QWidget *parent) :
     currentUserName(employeeName)
 {
     ui->setupUi(this);
+    QString displayName = employeeName;
+    if (displayName.isEmpty()) {
+        displayName = currentUserName;
+    }
+
+    // Capitalize properly if needed
+    QStringList nameParts = displayName.split(" ", Qt::SkipEmptyParts);
+    for (int i = 0; i < nameParts.size(); ++i) {
+        if (nameParts[i].length() > 1) {
+            nameParts[i] = nameParts[i].left(1).toUpper() + nameParts[i].mid(1).toLower();
+        }
+    }
+    QString formattedName = nameParts.join(" ");
+
     if (ui->message)
-        ui->message->setText(QString("Welcome, Dr. %1!").arg(currentUserName));
+        ui->message->setText(QString("Welcome, Dr. %1!").arg(formattedName));
 
     // Shared backend — same CSVs Admin & Receptionist windows read/write.
     patientMgr = new PatientManager();
     apptMgr    = new AppointmentManager();
+
+    ui->overviewBtn->setCheckable(true);
+    ui->patientlistBtn->setCheckable(true);
+    ui->scheduleBtn->setCheckable(true);
+    ui->overviewBtn->setChecked(true);
 
     // Clock
     timer = new QTimer(this);
@@ -129,6 +148,30 @@ doctorwindow::doctorwindow(const QString &employeeName, QWidget *parent) :
         "   font-weight: 600;"
         "   color: #5a6c7d;"
         "}"
+        "#sideBarFrame {"
+        "   background-color: #ffffff;"
+        "   border-right: 1px solid #e9ecef;"
+        "}"
+        "#sideBarFrame QPushButton {"
+        "   background-color: transparent;"
+        "   color: #5a6c7d;"
+        "   text-align: left;"
+        "   padding: 12px 20px;"
+        "   border: none;"
+        "   border-radius: 0px;"
+        "   font-size: 14px;"
+        "   font-weight: 500;"
+        "}"
+        "#sideBarFrame QPushButton:hover {"
+        "   background-color: #eef3f7;"
+        "   color: #1a73e8;"
+        "}"
+        "#sideBarFrame QPushButton:checked {"
+        "   background-color: #e8f0fe;"
+        "   color: #2c3e50;"
+        "   border-left: 4px solid #1a73e8;"
+        "   font-weight: 600;"
+        "}"
         );
 
     // Setup UI
@@ -166,8 +209,15 @@ void doctorwindow::updateDateTime()
 void doctorwindow::switchPage()
 {
     QPushButton *btn = qobject_cast<QPushButton *>(sender());
+
+    // Uncheck all buttons first
+    ui->overviewBtn->setChecked(false);
+    ui->patientlistBtn->setChecked(false);
+    ui->scheduleBtn->setChecked(false);
+
     if(btn == ui->overviewBtn) {
         ui->stackedWidget->setCurrentIndex(0);
+        ui->overviewBtn->setChecked(true);
         patientMgr->reload();
         apptMgr->reload();
         populatePatientList();
@@ -175,10 +225,12 @@ void doctorwindow::switchPage()
         setupStatsSection();
     } else if(btn == ui->patientlistBtn) {
         ui->stackedWidget->setCurrentIndex(1);
+        ui->patientlistBtn->setChecked(true);
         patientMgr->reload();
         refreshPatientList();
     } else if(btn == ui->scheduleBtn) {
         ui->stackedWidget->setCurrentIndex(2);
+        ui->scheduleBtn->setChecked(true);
         apptMgr->reload();
         refreshSchedulingTable();
     }
