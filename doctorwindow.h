@@ -7,6 +7,7 @@
 #include <QVBoxLayout>
 #include <QScrollArea>
 #include <QLabel>
+#include <QTableWidget>
 #include "doctor.h"
 #include "patientmanager.h"
 #include "appointmentmanager.h"
@@ -28,17 +29,15 @@ private slots:
     void updateDateTime();
     void switchPage();
     void logout();
-
-    // NEW: Overview layout setup (replaces setupOverviewPage)
     void setupOverviewLayout();
     void setupStatsSection();
-
-    // NEW: Populate functions for overview page
     void populatePatientList();
     void populateAppointmentsTable();
-
-    // NEW: View patient details
     void viewPatientDetails(const QString &patientId);
+
+    //Treatment functions
+    void openTreatmentDialog(const QString &patientId);
+
 
 private:
     Ui::doctorwindow *ui;
@@ -53,6 +52,8 @@ private:
     void setupPatientListPage();
     void refreshPatientList();
     void addPatientRow(const Patient &p);
+    void addPatientRowWithTreat(const Patient &p);    //For patient list with Treat button
+    void refreshPatientTable(QTableWidget *table);
 
     QVBoxLayout *patientRowsLayout = nullptr;
     QWidget     *patientRowContainer = nullptr;
@@ -62,6 +63,7 @@ private:
     void setupSchedulingPage();
     void refreshSchedulingTable();
     void addScheduleRow(const Appointment &a);
+
 
     QVBoxLayout *scheduleRowsLayout = nullptr;
     QWidget     *scheduleRowContainer = nullptr;

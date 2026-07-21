@@ -486,9 +486,9 @@ QFrame#sideBarFrame {
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>300</y>
+      <y>320</y>
       <width>161</width>
-      <height>51</height>
+      <height>41</height>
      </rect>
     </property>
     <property name="font">
@@ -505,11 +505,17 @@ QFrame#sideBarFrame {
    <widget class="QLabel" name="logoLabel">
     <property name="geometry">
      <rect>
-      <x>20</x>
+      <x>10</x>
       <y>10</y>
       <width>131</width>
       <height>131</height>
      </rect>
+    </property>
+    <property name="autoFillBackground">
+     <bool>false</bool>
+    </property>
+    <property name="styleSheet">
+     <string notr="true"/>
     </property>
     <property name="text">
      <string/>
@@ -520,14 +526,17 @@ QFrame#sideBarFrame {
     <property name="scaledContents">
      <bool>true</bool>
     </property>
+    <property name="wordWrap">
+     <bool>false</bool>
+    </property>
    </widget>
    <widget class="QPushButton" name="overviewBtn">
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>150</y>
+      <y>200</y>
       <width>161</width>
-      <height>51</height>
+      <height>41</height>
      </rect>
     </property>
     <property name="font">
@@ -545,9 +554,9 @@ QFrame#sideBarFrame {
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>220</y>
+      <y>260</y>
       <width>161</width>
-      <height>61</height>
+      <height>41</height>
      </rect>
     </property>
     <property name="font">
