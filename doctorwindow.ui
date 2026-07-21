@@ -58,9 +58,9 @@ QPushButton#scheduleBtn:checked {
   <widget class="QWidget" name="centralWidget" native="true">
    <property name="geometry">
     <rect>
-     <x>180</x>
+     <x>170</x>
      <y>10</y>
-     <width>1091</width>
+     <width>1101</width>
      <height>701</height>
     </rect>
    </property>
@@ -288,7 +288,7 @@ QPushButton::menu-indicator{
       <rect>
        <x>0</x>
        <y>0</y>
-       <width>1091</width>
+       <width>1101</width>
        <height>651</height>
       </rect>
      </property>
@@ -441,7 +441,7 @@ QPushButton::menu-indicator{
     <rect>
      <x>10</x>
      <y>10</y>
-     <width>161</width>
+     <width>141</width>
      <height>701</height>
     </rect>
    </property>
@@ -482,33 +482,13 @@ QFrame#sideBarFrame {
    <property name="frameShadow">
     <enum>QFrame::Shadow::Raised</enum>
    </property>
-   <widget class="QPushButton" name="scheduleBtn">
-    <property name="geometry">
-     <rect>
-      <x>0</x>
-      <y>320</y>
-      <width>161</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>Segoe UI</family>
-      <pointsize>12</pointsize>
-      <bold>false</bold>
-     </font>
-    </property>
-    <property name="text">
-     <string>      Schedule</string>
-    </property>
-   </widget>
    <widget class="QLabel" name="logoLabel">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>10</y>
-      <width>131</width>
-      <height>131</height>
+      <x>30</x>
+      <y>20</y>
+      <width>91</width>
+      <height>91</height>
      </rect>
     </property>
     <property name="autoFillBackground">
@@ -534,8 +514,8 @@ QFrame#sideBarFrame {
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>200</y>
-      <width>161</width>
+      <y>230</y>
+      <width>131</width>
       <height>41</height>
      </rect>
     </property>
@@ -547,15 +527,15 @@ QFrame#sideBarFrame {
      </font>
     </property>
     <property name="text">
-     <string>     Overview</string>
+     <string>    Overview</string>
     </property>
    </widget>
    <widget class="QPushButton" name="patientlistBtn">
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>260</y>
-      <width>161</width>
+      <y>280</y>
+      <width>131</width>
       <height>41</height>
      </rect>
     </property>
@@ -567,7 +547,27 @@ QFrame#sideBarFrame {
      </font>
     </property>
     <property name="text">
-     <string>     Patient List</string>
+     <string>    Patient List</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="scheduleBtn">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>330</y>
+      <width>131</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Segoe UI</family>
+      <pointsize>12</pointsize>
+      <bold>false</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>     Schedule</string>
     </property>
    </widget>
   </widget>
